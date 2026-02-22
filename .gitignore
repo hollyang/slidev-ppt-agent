@@ -1,0 +1,16 @@
+node_modules
+dist
+.DS_Store
+*.log
+npm-debug.log*
+
+# Slidev exports
+slides-export.pdf
+slides-export.pptx
+*-export.pdf
+*-export.pptx
+slides-export/
+
+# Environment variables
+.env
+.env.local

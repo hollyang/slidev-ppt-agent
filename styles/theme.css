@@ -1,0 +1,106 @@
+/*
+ * 🎨 全局主题变量 + 工具类
+ * 
+ * 修改下面的颜色值即可切换整套品牌色。
+ * 所有 layout/组件/slides.md 都引用这些变量和类名。
+ *
+ * 快速换色指南：
+ *   中金财富红:  --theme-primary-hex: #C41230
+ *   科技蓝:     --theme-primary-hex: #2563EB
+ *   翠绿:       --theme-primary-hex: #10B981
+ *   深紫:       --theme-primary-hex: #7C3AED
+ */
+
+:root {
+    /* ━━━ 核心品牌色 ━━━ */
+    --theme-primary-hex: #C41230;
+    --theme-primary-dark-hex: #8B0A1E;
+    --theme-primary-light-hex: #E8364F;
+
+    /* ━━━ 浅色系（用于卡片背景、badge） ━━━ */
+    --theme-primary-bg: #FFF5F5;
+    --theme-primary-bg-subtle: #FFF9F9;
+    --theme-primary-border: rgba(196, 18, 48, 0.15);
+    --theme-primary-border-light: rgba(196, 18, 48, 0.06);
+
+    /* ━━━ 页面背景 ━━━ */
+    --theme-bg: #faf8f7;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ * 工具类：在 slides.md 中使用
+ * 替代硬编码的 #C41230 等色值
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* 文字色 */
+.theme-text {
+    color: var(--theme-primary-hex) !important;
+}
+
+.theme-text-dark {
+    color: var(--theme-primary-dark-hex) !important;
+}
+
+/* 背景色 */
+.theme-bg-light {
+    background-color: var(--theme-primary-bg) !important;
+}
+
+.theme-bg-subtle {
+    background-color: var(--theme-primary-bg-subtle) !important;
+}
+
+.theme-bg-solid {
+    background-color: var(--theme-primary-hex) !important;
+}
+
+/* 边框 */
+.theme-border {
+    border-color: var(--theme-primary-border) !important;
+}
+
+.theme-border-light {
+    border-color: var(--theme-primary-border-light) !important;
+}
+
+/* 渐变 */
+.theme-gradient-text {
+    background: linear-gradient(to right, var(--theme-primary-hex), var(--theme-primary-light-hex)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+.theme-gradient-bg {
+    background: linear-gradient(135deg, var(--theme-primary-dark-hex), var(--theme-primary-hex)) !important;
+}
+
+/* Badge（标签/徽章）*/
+.theme-badge {
+    background-color: var(--theme-primary-bg) !important;
+    color: var(--theme-primary-hex) !important;
+    border: 1px solid var(--theme-primary-border) !important;
+}
+
+/* 圆点 */
+.theme-dot {
+    background-color: var(--theme-primary-hex) !important;
+}
+
+/* 序号圆圈 */
+.theme-number {
+    background-color: var(--theme-primary-bg) !important;
+    border: 1px solid var(--theme-primary-border) !important;
+    color: var(--theme-primary-hex) !important;
+}
+
+/* 提示条 */
+.theme-callout {
+    background-color: var(--theme-primary-bg) !important;
+    border: 1px solid var(--theme-primary-border) !important;
+}
+
+/* 深色结尾页 */
+.theme-dark-ending {
+    background: linear-gradient(135deg, var(--theme-primary-dark-hex), var(--theme-primary-hex)) !important;
+}

@@ -1,0 +1,21 @@
+{
+  "name": "slidev-demo",
+  "private": true,
+  "scripts": {
+    "dev": "slidev",
+    "build": "slidev build",
+    "export:pdf": "slidev export --timeout 60000",
+    "export:pptx": "slidev export --format pptx --timeout 60000",
+    "export:all": "npm run export:pdf && npm run export:pptx",
+    "generate": "node generate.js"
+  },
+  "dependencies": {
+    "@slidev/cli": "^0.49.19",
+    "@slidev/theme-default": "latest",
+    "@slidev/theme-seriph": "latest",
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "playwright-chromium": "^1.58.2"
+  }
+}

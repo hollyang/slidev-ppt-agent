@@ -1,0 +1,11 @@
+{
+    "brand": "中金财富",
+    "subtitle": "数据平台迁移宣讲",
+    "footer": "中金财富 · 内部资料",
+    "colors": {
+        "primary": "red",
+        "accent": "rose"
+    },
+    "font": "Inter",
+    "exportFormat": "both"
+}
