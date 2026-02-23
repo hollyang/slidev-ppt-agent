@@ -1,185 +1,77 @@
-# 🎯 PPT Agent — 基于 Slidev + LLM 的智能演示文稿生成器
+# 🤖 Slidev PPT Agent: 企业级幻灯片自动化引擎
 
-> 输入一句话需求，自动生成**网页级美观**的 PPT。
+本项目是一个基于 [Slidev](https://sli.dev/) 和 Google Gemini 大模型的智能幻灯片生成系统。它不仅能帮你排版，还能像高级战略顾问一样，为你产出具备深度洞察、量化数据和严密逻辑的演示文稿。
 
-## 📁 项目结构
+## 🌟 核心特性
 
-```
-slidev-demo/
-├── slides.md              ← 幻灯片内容（由 LLM 自动生成）
-├── generate.js            ← 🤖 Agent 核心生成脚本
-├── template.config.json   ← 品牌文字配置（公司名/副标题/页脚）
-├── styles/
-│   └── theme.css          ← 🎨 品牌色配置（改这里换全局颜色）
-├── layouts/
-│   └── custom.vue         ← 页面骨架（自动读取配置，无需改动）
-├── components/
-│   ├── DataCard.vue       ← 数据指标卡片
-│   ├── TimelineCard.vue   ← 时间线节点
-│   ├── QuoteCard.vue      ← 人物引用评价
-│   ├── FeatureItem.vue    ← 特性/能力条目
-│   ├── CompareTable.vue   ← 对比表格（表头）
-│   ├── CompareRow.vue     ← 对比表格（行）
-│   └── StatBar.vue        ← 进度条/数据条
-├── package.json
-├── slides-export.pdf      ← 导出的 PDF
-└── slides-export.pptx     ← 导出的 PPTX
-```
+- **专家级内容引擎**：内置“咨询顾问”思维，强制 AI 输出量化数据（ROI）和真实业务场景，拒绝空洞废话。
+- **丰富的组件库**：包含 `NodeFlow` (链路图), `CompareTable` (对比表), `ProcessStep` (流程条), `TechStack` (技术栈) 等 10+ 个专业业务组件。
+- **品牌化定制**：通过 `template.config.json` 一键切换品牌颜色、Logo 和页脚。
+- **自动化闭环**：一句话需求 -> AI 思考与排版 -> 自动生成 Markdown -> 自动导出 PDF/PPTX。
 
----
+## 🛠️ 组件库预览
+
+| 组件 | 场景 |
+| :--- | :--- |
+| `NodeFlow.vue` | 业务流向、Agent 决策链路可视化 |
+| `CompareTable.vue` | 方案优劣对比、新旧架构分析 |
+| `DataCard.vue` | KPI 达成、ROI 量化收益展示 |
+| `TechStack.vue` | 架构选型、技术栈组合展示 |
+| `ProcessStep.vue` | 项目里程碑、实施路径规划 |
+| `ProsCons.vue` | 风险挑战与核心优势评估 |
 
 ## 🚀 快速开始
 
 ### 1. 安装依赖
-
 ```bash
 npm install
 ```
 
-### 2. 一键生成 PPT（需要 Gemini API Key）
-
+### 2. 配置环境变量
+在使用 AI 生成功能前，请获取 [Gemini API Key](https://aistudio.google.com/app/apikey)。
 ```bash
-# 设置 API Key
-export GEMINI_API_KEY="your-api-key-here"
-
-# 输入需求，自动生成并导出
-node generate.js "帮我写一份关于新能源汽车行业 2024 年趋势分析的 PPT"
-
-# 或者从文件读取需求
-node generate.js --file requirements.txt
-
-# 仅生成 slides.md，不自动导出（方便预览调整）
-node generate.js "需求描述" --no-export
-
-# 指定导出格式
-node generate.js "需求描述" --format both    # pdf + pptx
-node generate.js "需求描述" --format pptx    # 仅 pptx
+export GEMINI_API_KEY="你的_API_KEY"
 ```
 
-### 3. 本地预览
-
+### 3. 一键生成幻灯片
 ```bash
+# 示例：生成一份 Agent 入门分享
+node generate.js "帮我写一份关于 AI Agent 的深度技术分享，包含架构拆解和金融落地案例"
+```
+
+### 4. 预览与导出
+```bash
+# 启动实时预览
 npm run dev
-```
 
-### 4. 手动导出
-
-```bash
+# 导出为 PDF
 npm run export:pdf
+
+# 导出为 PPTX
 npm run export:pptx
-npm run export:all
 ```
 
----
+## ⚙️ 进阶配置
 
-## 🎨 换品牌——只需改 2 个文件
-
-### 第一步：改文字 — `template.config.json`
+修改 `template.config.json` 即可自定义你的品牌风格：
 
 ```json
 {
-  "brand": "你的公司名",
-  "subtitle": "演示副标题",
-  "footer": "公司名 · 内部资料",
-  "exportFormat": "both"
+    "brand": "你的品牌名",
+    "subtitle": "副标题内容",
+    "colors": {
+        "primary": "red",
+        "accent": "rose"
+    }
 }
 ```
 
-### 第二步：改颜色 — `styles/theme.css`
+## 📈 开发逻辑
 
-```css
-:root {
-  /* 换成你的品牌色即可，全局生效 */
-  --theme-primary-hex: #2563EB;        /* 蓝色示例 */
-  --theme-primary-dark-hex: #1D4ED8;
-  --theme-primary-light-hex: #3B82F6;
-
-  --theme-primary-bg: #EFF6FF;
-  --theme-primary-bg-subtle: #F5F9FF;
-  --theme-primary-border: rgba(37, 99, 235, 0.15);
-  --theme-primary-border-light: rgba(37, 99, 235, 0.06);
-}
-```
-
-**就这两步，全部完成。** Layout、组件、slides.md 中的所有品牌色都会自动跟随。
-
-### 预设色板参考
-
-| 品牌 | primary-hex | primary-dark-hex | primary-light-hex |
-|------|------------|------------------|-------------------|
-| 中金财富红 | `#C41230` | `#8B0A1E` | `#E8364F` |
-| 科技蓝 | `#2563EB` | `#1D4ED8` | `#3B82F6` |
-| 翠绿 | `#10B981` | `#059669` | `#34D399` |
-| 深紫 | `#7C3AED` | `#6D28D9` | `#8B5CF6` |
-| 琥珀橙 | `#F59E0B` | `#D97706` | `#FBBF24` |
+1. **Research**: `generate.js` 自动扫描 `components/` 目录，获取所有可用组件的定义。
+2. **Strategy**: 构造 System Prompt，注入 SCQA 逻辑与行业洞察。
+3. **Execution**: 调用 Gemini 模型生成符合 Slidev 语法的 Markdown。
+4. **Validation**: 自动通过 Slidev 编译器进行语法校验并导出。
 
 ---
-
-## 🧩 添加新组件
-
-1. 在 `components/` 目录创建 `.vue` 文件
-2. 使用 `defineProps` 声明 props，使用 `<slot>` 声明插槽
-3. `generate.js` 会自动扫描并告知 LLM 可以使用新组件
-4. 无需修改任何其他文件
-
----
-
-## 🎨 主题工具类速查
-
-在 `slides.md` 中使用以下 CSS 类即可引用品牌色，**不要硬编码 hex 值**：
-
-| 类名 | 用途 |
-|------|------|
-| `theme-text` | 品牌色文字 |
-| `theme-badge` | 品牌色标签（背景+文字+边框） |
-| `theme-gradient-text` | 品牌色渐变文字 |
-| `theme-number` | 品牌色序号圆圈 |
-| `theme-callout` | 品牌色提示框 |
-| `theme-bg-light` | 品牌色浅背景 |
-| `theme-bg-solid` | 品牌色实底背景 |
-| `theme-dot` | 品牌色圆点 |
-| `theme-dark-ending` | 深色结尾页渐变 |
-
----
-
-## ⚠️ Slidev Markdown 写作注意事项
-
-这些是坑，必须知道：
-
-1. **Vue 组件必须顶格写**，不能有缩进，否则被当纯文本
-   ```markdown
-   <!-- ✅ 正确 -->
-   <DataCard title="标题">内容</DataCard>
-
-   <!-- ❌ 错误（有缩进）-->
-     <DataCard title="标题">内容</DataCard>
-   ```
-
-2. **不要在 `<template #slot>` 标签里嵌套 Markdown 语法**
-
-3. **每页用 `---` 分隔**，第一行必须是 frontmatter
-
-4. **控制每页内容量**，可视区只有约 480px 高度
-
----
-
-## 🔄 复用流程一览
-
-```
-                 ┌─────────────────────┐
-                 │  1. 改 config.json  │ ← 品牌名/副标题
-                 │  2. 改 theme.css    │ ← 品牌色（3 个 hex）
-                 └────────┬────────────┘
-                          │
-                          ▼
-              ┌───────────────────────┐
-              │  node generate.js     │
-              │  "你的 PPT 需求描述"  │
-              └────────┬──────────────┘
-                       │
-          ┌────────────┼────────────┐
-          ▼            ▼            ▼
-     slides.md    export.pdf   export.pptx
-```
-
-**换公司：2 分钟。换主题：30 秒。生成新 PPT：1 条命令。**
+Made with ❤️ by Slidev PPT Agent
