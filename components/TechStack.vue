@@ -17,8 +17,7 @@ defineProps<{
     <div class="grid grid-cols-4 gap-2">
       <div v-for="item in items" :key="item.name" 
            class="bg-slate-50 border border-slate-100 rounded-lg p-2 flex flex-col items-center justify-center text-center hover:border-red-200 transition-colors cursor-default group">
-        <div class="text-xl mb-1 group-hover:scale-110 transition-transform">
-          {{ item.icon || '🛠️' }}
+        <div :class="[item.icon || 'i-carbon-tool-box', 'text-xl mb-1 group-hover:scale-110 transition-transform']">
         </div>
         <div class="text-[11px] font-bold text-slate-700 truncate w-full px-1">
           {{ item.name }}
