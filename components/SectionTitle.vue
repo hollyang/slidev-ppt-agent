@@ -7,15 +7,16 @@ defineProps<{
 </script>
 
 <template>
-  <div class="h-full flex flex-col justify-center items-center text-center">
-    <div v-if="number" class="theme-number w-12 h-12 flex items-center justify-center rounded-full text-xl font-bold mb-6">
-      {{ number }}
+  <div class="mb-6 flex flex-col items-start border-b border-slate-100 pb-4">
+    <div class="flex items-center gap-3 mb-2">
+      <div v-if="number" class="theme-number w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold">
+        {{ number }}
+      </div>
+      <h2 class="!text-3xl font-extrabold !mb-0 tracking-tight">
+        <span class="theme-gradient-text">{{ title }}</span>
+      </h2>
     </div>
-    <h2 class="!text-5xl font-extrabold !mb-4 tracking-tight">
-      <span class="theme-gradient-text">{{ title }}</span>
-    </h2>
-    <div v-if="subtitle" class="h-1 w-16 bg-slate-200 mb-4"></div>
-    <p v-if="subtitle" class="text-slate-500 text-lg max-w-xl leading-relaxed">
+    <p v-if="subtitle" class="text-slate-500 text-sm mt-2 max-w-2xl leading-relaxed">
       {{ subtitle }}
     </p>
   </div>
