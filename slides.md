@@ -1,500 +1,406 @@
 ---
 layout: custom
-transition: fade-out
+transition: slide-up
 ---
 
 <div class="h-full flex flex-col justify-center">
 <div class="theme-badge inline-block px-3 py-1 rounded-full text-xs font-bold mb-3 max-w-max">
-📢 数据平台战略升级 · 2024
+🛡️ 2024 战略技术内参 · 深度版
 </div>
-<h1 class="!text-4xl !mb-3">
-TBDS → WeData<br/>
-<span class="theme-gradient-text">数据平台迁移宣讲</span>
+<h1 class="!text-5xl !mb-4 leading-tight">
+<span class="theme-gradient-text">AI Agent 深度解析</span><br/>
+从底层原理到企业级架构实战
 </h1>
-<p class="!text-sm text-slate-500 max-w-2xl leading-relaxed !mb-5">
-从腾讯大数据套件 (TBDS) 全面迁移至新一代数据开发治理平台 WeData。<br/>
-实现数据资产统一管理、开发效率跨级提升、治理能力从无到有的战略性升级。
+<p class="!text-sm text-slate-500 max-w-2xl leading-relaxed !mb-8">
+<b>核心目标：</b> 透视 Agent 如何重塑软件开发范式，<br/>
+构建具备「自主决策」与「工程化落地」能力的智能体系统。
 </p>
 <div class="flex items-center gap-6 text-xs text-slate-400">
-<div class="flex items-center gap-1.5"><span class="theme-dot w-1.5 h-1.5 rounded-full"></span>中金财富 · 数据中台团队</div>
-<div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>2024 年度专项</div>
-<div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>预计工期 10 周</div>
-</div>
-</div>
-
----
-layout: custom
-transition: slide-up
----
-
-# 📋 议程
-
-<p class="text-xs text-slate-500 mb-4">本次宣讲共分 5 个模块，全面覆盖迁移的"为什么、是什么、怎么做"。</p>
-
-<div class="grid grid-cols-5 gap-2">
-<div class="bg-white rounded-xl p-3 border border-slate-100 shadow-sm text-center hover:shadow-md transition-shadow">
-<div class="theme-number w-8 h-8 mx-auto rounded-lg flex items-center justify-center text-sm mb-2 font-black">01</div>
-<h4 class="!text-[11px] font-bold text-slate-800 !mb-0.5">背景与痛点</h4>
-<p class="!text-[10px] text-slate-400">TBDS 现状分析</p>
-</div>
-<div class="bg-white rounded-xl p-3 border border-slate-100 shadow-sm text-center hover:shadow-md transition-shadow">
-<div class="theme-number w-8 h-8 mx-auto rounded-lg flex items-center justify-center text-sm mb-2 font-black">02</div>
-<h4 class="!text-[11px] font-bold text-slate-800 !mb-0.5">WeData 介绍</h4>
-<p class="!text-[10px] text-slate-400">能力与优势对比</p>
-</div>
-<div class="bg-white rounded-xl p-3 border border-slate-100 shadow-sm text-center hover:shadow-md transition-shadow">
-<div class="theme-number w-8 h-8 mx-auto rounded-lg flex items-center justify-center text-sm mb-2 font-black">03</div>
-<h4 class="!text-[11px] font-bold text-slate-800 !mb-0.5">迁移方案</h4>
-<p class="!text-[10px] text-slate-400">范围、路径与计划</p>
-</div>
-<div class="bg-white rounded-xl p-3 border border-slate-100 shadow-sm text-center hover:shadow-md transition-shadow">
-<div class="theme-number w-8 h-8 mx-auto rounded-lg flex items-center justify-center text-sm mb-2 font-black">04</div>
-<h4 class="!text-[11px] font-bold text-slate-800 !mb-0.5">风险与保障</h4>
-<p class="!text-[10px] text-slate-400">回滚、验证与培训</p>
-</div>
-<div class="bg-white rounded-xl p-3 border border-slate-100 shadow-sm text-center hover:shadow-md transition-shadow">
-<div class="theme-number w-8 h-8 mx-auto rounded-lg flex items-center justify-center text-sm mb-2 font-black">05</div>
-<h4 class="!text-[11px] font-bold text-slate-800 !mb-0.5">预期收益</h4>
-<p class="!text-[10px] text-slate-400">KPI 与行业案例</p>
-</div>
-</div>
-
-<div class="mt-4 bg-slate-900 rounded-lg p-3 flex items-center gap-3">
-<div class="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center text-base shrink-0">⏱️</div>
-<div>
-<h4 class="!text-xs font-bold text-white !mb-0">预计时长 45 分钟</h4>
-<p class="text-slate-400 !text-[11px] !mt-0.5">含 Q&A 环节，请随时提问。</p>
-</div>
-</div>
-
----
-layout: custom
-transition: slide-left
----
-
-# 🔍 TBDS 现状与痛点分析
-
-<p class="text-xs text-slate-500 mb-3">TBDS 在过去 3 年支撑了中金财富数据中台的基础建设，但随着业务深化，瓶颈日益突出。</p>
-
-<div class="grid grid-cols-2 gap-3">
-<div>
-<div class="grid grid-cols-1 gap-2">
-<FeatureItem title="组件版本碎片化" color="red">
-<template #icon>🧩</template>
-Hadoop/Spark/Hive 各组件版本不统一，升级一个组件可能导致依赖链断裂，运维团队疲于应对兼容性问题。
-</FeatureItem>
-<FeatureItem v-click title="调度能力薄弱" color="red">
-<template #icon>⏰</template>
-原生调度器功能简陋，缺少任务依赖可视化、跨工作流编排、失败重试策略等企业级特性。
-</FeatureItem>
-<FeatureItem v-click title="数据治理几乎空白" color="red">
-<template #icon>🕳️</template>
-无元数据管理、无血缘追踪、无数据质量监控。2000+ 张表的关系完全是"黑箱"状态。
-</FeatureItem>
-</div>
-</div>
-<div>
-<div class="bg-white rounded-xl p-4 border border-slate-100 shadow-sm h-full">
-<h3 class="!text-xs font-bold text-slate-800 !mb-3 flex items-center gap-1">📊 当前资产盘点</h3>
-<StatBar label="离线 ETL 任务" :value="100" color="red">共 387 个调度任务，日均运行 1,200+ 次</StatBar>
-<StatBar v-click label="实时 Flink 任务" :value="65" color="amber">共 42 个流式任务，覆盖行情/风控</StatBar>
-<StatBar v-click label="数据源连接" :value="80" color="purple">MySQL × 12, Oracle × 4, Kafka × 6, HDFS × 3</StatBar>
-<StatBar v-click label="日处理数据量" :value="90" color="blue">日均处理约 2.3TB 数据</StatBar>
+<div class="flex items-center gap-2 px-3 py-1 bg-slate-50 rounded-full border border-slate-100">
+  <span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+  中金财富 · 数字化转型办公室
 </div>
 </div>
 </div>
 
 ---
 layout: custom
-transition: slide-left
 ---
 
-# ⚠️ 最大风险：TBDS 产品生命周期进入末期
+<p class="text-xs text-slate-500 mb-3">范式演进 · EVOLUTION</p>
+<h1 class="!mb-6">AI 能力演进的三大阶段</h1>
 
-<p class="text-xs text-slate-500 mb-3">腾讯云已明确将战略重心从 TBDS 转移至 WeData，这是推动本次迁移的核心外部因素。</p>
+<div class="grid grid-cols-3 gap-4">
+<FeatureItem title="1. 工具时代 (Tool)" color="slate">
+<template #icon>🛠️</template>
+<b>关键词：</b>被动执行。<br/>
+如：Excel 宏、传统 RPA。需人工编写每一行逻辑，无法处理模糊性。
+</FeatureItem>
+
+<FeatureItem title="2. 协作时代 (Copilot)" color="blue">
+<template #icon>🧑‍💻</template>
+<b>关键词：</b>副驾驶。<br/>
+如：GitHub Copilot。AI 提供建议，人做决策并执行，属于「人机循环」。
+</FeatureItem>
+
+<FeatureItem title="3. 智能体时代 (Agent)" color="emerald">
+<template #icon>🤖</template>
+<b>关键词：</b>自主闭环。<br/>
+<b>Agent = LLM + Planning + Memory + Tools。</b> 具备自主设定目标并修正的能力。
+</FeatureItem>
+</div>
+
+<div class="mt-6">
+<Callout type="info">
+<b>本质区别：</b>从「你教我怎么做 (How)」到「我帮你达成目标 (What)」。
+</Callout>
+</div>
+
+---
+layout: custom
+---
+
+<SectionTitle number="01" title="底层架构拆解" subtitle="深度解析智能体运作的四个核心组件" />
+
+---
+layout: custom
+---
+
+<p class="text-xs text-slate-500 mb-3">大脑：规划与推理 · PLANNING</p>
+<h1 class="!mb-6">规划能力：让 AI 具备逻辑链条</h1>
+
+<div class="grid grid-cols-2 gap-8">
+<div>
+  <p class="text-[11px] text-slate-600 mb-4">
+    Agent 的核心是解决「幻觉」并确保执行路径正确。目前主流的三种推理模式：
+  </p>
+  <ul class="space-y-4">
+    <li v-click class="flex gap-3">
+      <div class="theme-number w-5 h-5 flex-shrink-0 text-[10px]">1</div>
+      <div>
+        <b class="text-xs">CoT (思维链)</b>
+        <p class="text-[10px] text-slate-400">Step-by-step 线性推理，解决复杂逻辑问题的基石。</p>
+      </div>
+    </li>
+    <li v-click class="flex gap-3">
+      <div class="theme-number w-5 h-5 flex-shrink-0 text-[10px]">2</div>
+      <div>
+        <b class="text-xs">ToT (思维树)</b>
+        <p class="text-[10px] text-slate-400">多路径探索+剪枝，像下围棋一样寻找最优解。</p>
+      </div>
+    </li>
+    <li v-click class="flex gap-3">
+      <div class="theme-number w-5 h-5 flex-shrink-0 text-[10px]">3</div>
+      <div>
+        <b class="text-xs">ReAct (推理与行动)</b>
+        <p class="text-[10px] text-slate-400">将内心独白与外部操作交织，实现闭环反馈。</p>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+  <p class="text-[10px] font-bold text-blue-600 mb-2 uppercase tracking-wider">ReAct 运行实例：</p>
+  <div class="font-mono text-[9px] space-y-2">
+    <div class="text-slate-500">[User] 查询中金财富最近三年的净利润趋势。</div>
+    <div class="text-blue-500">Thought: 数据库无实时数据，需调用搜索引擎。</div>
+    <div class="text-emerald-500">Action: Search(中金财富 2021-2023 年报)</div>
+    <div class="text-amber-600">Observation: 2021(¥xx亿), 2022(¥xx亿)...</div>
+    <div class="text-blue-500">Thought: 数据已获取，计算年复合增长率。</div>
+    <div class="text-emerald-500">Action: Python_Runner(CAGR_calc.py)</div>
+  </div>
+</div>
+</div>
+
+---
+layout: custom
+---
+
+<p class="text-xs text-slate-500 mb-3">心脏：记忆系统 · MEMORY</p>
+<h1 class="!mb-6">记忆系统：解决「转头就忘」的问题</h1>
+
+<div class="grid grid-cols-2 gap-6">
+<div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+  <h4 class="text-xs font-bold text-blue-800 mb-2">短期记忆 (Context)</h4>
+  <p class="text-[10px] text-slate-600 leading-relaxed">
+    基于 Transformer 的 Attention 机制。记录当前对话的上下文。
+    <br/><br/>
+    <b>限制：</b>受限于 Token 窗口（如 128k），一旦超限会导致逻辑崩塌。
+  </p>
+</div>
+<div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+  <h4 class="text-xs font-bold text-emerald-800 mb-2">长期记忆 (RAG)</h4>
+  <p class="text-[10px] text-slate-600 leading-relaxed">
+    基于向量数据库 (Vector DB)。
+    <br/><br/>
+    <b>原理：</b>将企业私有文档切片、向量化并检索。让 Agent 具备「查字典」的能力。
+  </p>
+</div>
+</div>
+
+<div class="mt-6">
+<NodeFlow :nodes="[
+  { title: '用户 Query', type: 'input', icon: '❓' },
+  { title: '语义检索', type: 'process', icon: '🔎' },
+  { title: 'Top-K 召回', type: 'process', icon: '📄' },
+  { title: '增强生成', type: 'output', icon: '✨' }
+]" />
+</div>
+
+---
+layout: custom
+---
+
+<SectionTitle number="02" title="多智能体系统 (MAS)" subtitle="从「单兵作战」到「组织化协作」" />
+
+---
+layout: custom
+---
+
+<p class="text-xs text-slate-500 mb-3">群体智能 · COLLABORATION</p>
+<h1 class="!mb-6">Multi-Agent：数字工厂的诞生</h1>
 
 <div class="grid grid-cols-2 gap-4">
-<div>
-<div class="theme-callout rounded-xl p-4">
-<h3 class="!text-xs font-bold theme-text !mb-2">🚨 TBDS 面临的风险</h3>
-<div class="space-y-2">
-<div class="flex items-start gap-2">
-<span class="theme-text text-xs mt-0.5">●</span>
-<p class="!text-[11px] text-slate-700">新特性开发已停止，仅提供安全补丁级维护</p>
+<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col justify-between">
+  <div>
+    <h4 class="text-sm font-bold mb-2">为什么需要多智能体？</h4>
+    <p class="text-[10px] text-slate-500 leading-relaxed">
+      单模型处理复杂长链路任务时，准确率会随步数增加呈指数级下降。
+      <br/><br/>
+      <b>解决方案：</b>让 Agent 具备角色（Role-play），通过 SOP (标准作业程序) 进行分工。
+    </p>
+  </div>
+  <Callout type="tip" class="!my-0">
+    核心思想：<b>复杂问题解构为专业 Agent 之间的对话。</b>
+  </Callout>
 </div>
-<div class="flex items-start gap-2">
-<span class="theme-text text-xs mt-0.5">●</span>
-<p class="!text-[11px] text-slate-700">技术支持响应从 4 小时 SLA 降级至 48 小时</p>
-</div>
-<div class="flex items-start gap-2">
-<span class="theme-text text-xs mt-0.5">●</span>
-<p class="!text-[11px] text-slate-700">社区活跃度下降 70%，遇到问题难以找到解决方案</p>
-</div>
-<div class="flex items-start gap-2">
-<span class="theme-text text-xs mt-0.5">●</span>
-<p class="!text-[11px] text-slate-700">底层 Hadoop 3.x 生态兼容性更新无官方计划</p>
-</div>
-</div>
-</div>
-</div>
-<div>
-<div class="bg-emerald-50/50 rounded-xl p-4 border border-emerald-100">
-<h3 class="!text-xs font-bold text-emerald-700 !mb-2">✅ WeData 是官方推荐的继任者</h3>
-<div class="space-y-2">
-<div class="flex items-start gap-2">
-<span class="text-emerald-500 text-xs mt-0.5">●</span>
-<p class="!text-[11px] text-slate-700">腾讯云 2024 年主推数据平台产品，研发投入增加 3 倍</p>
-</div>
-<div class="flex items-start gap-2">
-<span class="text-emerald-500 text-xs mt-0.5">●</span>
-<p class="!text-[11px] text-slate-700">提供专用 TBDS → WeData 迁移工具包与专家驻场</p>
-</div>
-<div class="flex items-start gap-2">
-<span class="text-emerald-500 text-xs mt-0.5">●</span>
-<p class="!text-[11px] text-slate-700">100+ 企业已成功迁移，积累了成熟的最佳实践</p>
-</div>
-<div class="flex items-start gap-2">
-<span class="text-emerald-500 text-xs mt-0.5">●</span>
-<p class="!text-[11px] text-slate-700">金融行业专属合规方案，满足监管审计要求</p>
-</div>
-</div>
-</div>
+
+<div class="space-y-3">
+  <div v-click class="flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+    <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white text-xs">PM</div>
+    <div class="text-[10px]"><b>Manager Agent：</b>负责任务分配与质量门禁</div>
+  </div>
+  <div v-click class="flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-100 shadow-sm ml-4">
+    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">C</div>
+    <div class="text-[10px]"><b>Coder Agent：</b>负责代码实现与本地调试</div>
+  </div>
+  <div v-click class="flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-100 shadow-sm ml-8">
+    <div class="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white text-xs">V</div>
+    <div class="text-[10px]"><b>Reviewer Agent：</b>负责代码审查与安全扫描</div>
+  </div>
 </div>
 </div>
 
 ---
 layout: custom
-transition: slide-left
 ---
 
-# 🚀 WeData 平台核心能力总览
+<p class="text-xs text-slate-500 mb-3">主流框架 · FRAMEWORKS</p>
+<h1 class="!mb-6">开源生态：谁在引领 Agent 革命？</h1>
 
-<p class="text-xs text-slate-500 mb-3">WeData 是腾讯云新一代一站式数据开发治理平台，覆盖数据全生命周期。</p>
-
-<div class="grid grid-cols-3 gap-2">
-<FeatureItem title="数据集成 DataInLong" color="blue">
-<template #icon>📥</template>
-支持 50+ 数据源，离线全量/增量 + 实时 CDC，可视化配置零代码接入。
-</FeatureItem>
-<FeatureItem v-click title="数据开发 DataStudio" color="purple">
-<template #icon>💻</template>
-在线 SQL IDE，支持 Hive/Spark/Presto 多引擎，版本管理与协作开发。
-</FeatureItem>
-<FeatureItem v-click title="任务调度 Orchestrator" color="amber">
-<template #icon>⏰</template>
-DAG 可视化编排，跨工作流依赖，灵活重试策略与告警通知。
-</FeatureItem>
-<FeatureItem v-click title="数据质量 DataQuality" color="emerald">
-<template #icon>✅</template>
-内置 20+ 质量规则模板，支持自定义 SQL 校验，异常自动阻断下游。
-</FeatureItem>
-<FeatureItem v-click title="元数据中心 MetaHub" color="red">
-<template #icon>🗂️</template>
-自动采集表/字段/任务元信息，血缘图谱可视化，影响面一键分析。
-</FeatureItem>
-<FeatureItem v-click title="数据安全 DataGuard" color="slate">
-<template #icon>🔒</template>
-列级权限管控、敏感数据识别与脱敏、操作审计日志全量留存。
-</FeatureItem>
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-4">
+  <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+    <b class="text-xs block mb-1">LangGraph (LangChain 家族)</b>
+    <p class="text-[9px] text-slate-500">主打「有状态的多步迭代」，支持循环逻辑。适合构建极其复杂的工业级工作流。</p>
+  </div>
+  <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+    <b class="text-xs block mb-1">CrewAI</b>
+    <p class="text-[9px] text-slate-500">主打「角色驱动」，让 Agent 像团队成员一样协作。代码极简，上手快。</p>
+  </div>
 </div>
-
----
-layout: custom
-transition: slide-left
----
-
-# ⚡ 核心能力对比：TBDS vs WeData
-
-<p class="text-xs text-slate-500 mb-3">以下从 6 个维度进行详细对比，直观展示迁移的价值增量。</p>
-
-<CompareTable oldLabel="TBDS (现状)" newLabel="WeData (目标)" dimensionLabel="能力维度" oldColor="red" newColor="emerald">
-<CompareRow dimension="数据集成">
-<template #old>手动编写 Shell/Python 脚本，配置分散</template>
-<template #new>可视化配置 50+ 数据源，支持 CDC 实时同步</template>
-</CompareRow>
-<CompareRow dimension="任务调度">
-<template #old>Azkaban 基础调度，无跨流程依赖</template>
-<template #new>DAG 可视化编排，跨工作流依赖，智能重试</template>
-</CompareRow>
-<CompareRow dimension="数据质量">
-<template #old>❌ 无内置能力，全靠人工抽检</template>
-<template #new>✅ 20+ 内置规则，异常自动阻断下游</template>
-</CompareRow>
-<CompareRow dimension="元数据管理">
-<template #old>❌ 无，表关系完全是黑箱</template>
-<template #new>✅ 自动血缘追踪，影响面分析</template>
-</CompareRow>
-<CompareRow dimension="权限管控">
-<template #old>集群级粗粒度，无列级控制</template>
-<template #new>库/表/列三级，敏感字段自动脱敏</template>
-</CompareRow>
-<CompareRow dimension="运维管理">
-<template #old>手动部署，组件版本需自行维护</template>
-<template #new>云原生托管，弹性扩缩容，免运维</template>
-</CompareRow>
-</CompareTable>
-
----
-layout: custom
-transition: slide-left
----
-
-# 📦 迁移范围与资产清单
-
-<p class="text-xs text-slate-500 mb-3">本次迁移覆盖中金财富数据中台 TBDS 集群上的全部生产资产。</p>
-
-<div class="grid grid-cols-2 gap-4">
-<div>
-<div class="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-<h3 class="!text-xs font-bold text-slate-800 !mb-3">🗃️ 资产明细</h3>
-<div class="space-y-1">
-<div class="flex justify-between items-center text-[11px] py-1.5 border-b border-slate-50">
-<span class="text-slate-600">Hive 数据表</span>
-<span class="font-bold text-slate-800 bg-slate-50 px-2 py-0.5 rounded">2,147 张</span>
-</div>
-<div class="flex justify-between items-center text-[11px] py-1.5 border-b border-slate-50">
-<span class="text-slate-600">离线 ETL 任务 (Shell/SQL/Spark)</span>
-<span class="font-bold text-slate-800 bg-slate-50 px-2 py-0.5 rounded">387 个</span>
-</div>
-<div class="flex justify-between items-center text-[11px] py-1.5 border-b border-slate-50">
-<span class="text-slate-600">实时 Flink 流任务</span>
-<span class="font-bold text-slate-800 bg-slate-50 px-2 py-0.5 rounded">42 个</span>
-</div>
-<div class="flex justify-between items-center text-[11px] py-1.5 border-b border-slate-50">
-<span class="text-slate-600">数据源连接配置</span>
-<span class="font-bold text-slate-800 bg-slate-50 px-2 py-0.5 rounded">25 个</span>
-</div>
-<div class="flex justify-between items-center text-[11px] py-1.5 border-b border-slate-50">
-<span class="text-slate-600">用户账号 & 权限策略</span>
-<span class="font-bold text-slate-800 bg-slate-50 px-2 py-0.5 rounded">68 个</span>
-</div>
-<div class="flex justify-between items-center text-[11px] py-1.5">
-<span class="text-slate-600">HDFS 存量数据</span>
-<span class="font-bold text-slate-800 bg-slate-50 px-2 py-0.5 rounded">~18 TB</span>
-</div>
-</div>
-</div>
-</div>
-<div>
-<div class="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-<h3 class="!text-xs font-bold text-slate-800 !mb-3">🎯 迁移策略分级</h3>
-<StatBar label="P0 核心生产任务" :value="100" color="red">日报/风控/合规等 56 个任务，优先切换</StatBar>
-<StatBar v-click label="P1 重要业务任务" :value="75" color="amber">营销分析/客户画像等 180 个任务</StatBar>
-<StatBar v-click label="P2 一般业务任务" :value="50" color="blue">内部分析/临时查询等 151 个任务</StatBar>
-<StatBar v-click label="P3 待下线任务" :value="15" color="slate">长期未运行 / 已废弃，归档后不迁移</StatBar>
-</div>
+<div class="space-y-4">
+  <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+    <b class="text-xs block mb-1">MetaGPT</b>
+    <p class="text-[9px] text-slate-500">主打「软件工程化」，将 SOP 注入 Agent。适合一次性生成整个软件项目。</p>
+  </div>
+  <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+    <b class="text-xs block mb-1">AutoGen (Microsoft)</b>
+    <p class="text-[9px] text-slate-500">主打「可对话性」，让 Agent 能够互相讨论、互相纠错。</p>
+  </div>
 </div>
 </div>
 
 ---
 layout: custom
-transition: slide-left
 ---
 
-# 🗺️ 迁移实施路线图（10 周）
-
-<p class="text-xs text-slate-500 mb-3">分 4 个阶段推进，每阶段设置明确的交付门槛和验收标准。</p>
-
-<div class="grid grid-cols-4 gap-2">
-<div class="bg-white rounded-xl p-3 border border-slate-100 shadow-sm">
-<div class="flex items-center gap-1.5 mb-2">
-<div class="theme-number w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black">1</div>
-<span class="text-[11px] font-bold text-slate-800">评估准备</span>
-</div>
-<div class="text-[10px] theme-text font-bold mb-1">第 1-2 周</div>
-<div class="space-y-1 text-[10px] text-slate-600">
-<div class="flex items-start gap-1"><span class="text-slate-400">·</span>全量资产盘点</div>
-<div class="flex items-start gap-1"><span class="text-slate-400">·</span>兼容性评估报告</div>
-<div class="flex items-start gap-1"><span class="text-slate-400">·</span>WeData 环境部署</div>
-<div class="flex items-start gap-1"><span class="text-slate-400">·</span>网络与权限打通</div>
-</div>
-</div>
-<div v-click class="bg-white rounded-xl p-3 border border-slate-100 shadow-sm">
-<div class="flex items-center gap-1.5 mb-2">
-<div class="theme-number w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black">2</div>
-<span class="text-[11px] font-bold text-slate-800">P0 迁移</span>
-</div>
-<div class="text-[10px] theme-text font-bold mb-1">第 3-4 周</div>
-<div class="space-y-1 text-[10px] text-slate-600">
-<div class="flex items-start gap-1"><span class="text-slate-400">·</span>56 个核心任务迁移</div>
-<div class="flex items-start gap-1"><span class="text-slate-400">·</span>新旧双跑 3 天</div>
-<div class="flex items-start gap-1"><span class="text-slate-400">·</span>数据一致性 diff</div>
-<div class="flex items-start gap-1"><span class="text-slate-400">·</span>P0 验收确认</div>
-</div>
-</div>
-<div v-click class="bg-white rounded-xl p-3 border border-slate-100 shadow-sm">
-<div class="flex items-center gap-1.5 mb-2">
-<div class="theme-number w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black">3</div>
-<span class="text-[11px] font-bold text-slate-800">P1/P2 迁移</span>
-</div>
-<div class="text-[10px] theme-text font-bold mb-1">第 5-8 周</div>
-<div class="space-y-1 text-[10px] text-slate-600">
-<div class="flex items-start gap-1"><span class="text-slate-400">·</span>331 个任务批量迁移</div>
-<div class="flex items-start gap-1"><span class="text-slate-400">·</span>数据源连接切换</div>
-<div class="flex items-start gap-1"><span class="text-slate-400">·</span>用户权限迁移</div>
-<div class="flex items-start gap-1"><span class="text-slate-400">·</span>分批验收</div>
-</div>
-</div>
-<div v-click class="bg-white rounded-xl p-3 border border-slate-100 shadow-sm">
-<div class="flex items-center gap-1.5 mb-2">
-<div class="theme-number w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black">4</div>
-<span class="text-[11px] font-bold text-slate-800">切换上线</span>
-</div>
-<div class="text-[10px] theme-text font-bold mb-1">第 9-10 周</div>
-<div class="space-y-1 text-[10px] text-slate-600">
-<div class="flex items-start gap-1"><span class="text-slate-400">·</span>全量切换至 WeData</div>
-<div class="flex items-start gap-1"><span class="text-slate-400">·</span>TBDS 集群下线</div>
-<div class="flex items-start gap-1"><span class="text-slate-400">·</span>监控告警验证</div>
-<div class="flex items-start gap-1"><span class="text-slate-400">·</span>项目总结复盘</div>
-</div>
-</div>
-</div>
+<SectionTitle number="03" title="落地实战与 ROI" subtitle="从技术玩具到生产力利器的关键一步" />
 
 ---
 layout: custom
-transition: slide-left
 ---
 
-# 🛡️ 风险控制与保障机制
+<p class="text-xs text-slate-500 mb-3">实战场景：金融审计 · CASE STUDY</p>
+<h1 class="!mb-6">Agent 如何重塑企业财务审计流程？</h1>
 
-<p class="text-xs text-slate-500 mb-3">从技术、流程、人员三个维度建立全方位保障体系。</p>
+<ProcessStep :steps="[
+  { title: '数据抽取', desc: 'Agent 自动接入 ERP 系统，抓取 5000+ 条流水', status: 'done', icon: '📥' },
+  { title: '合规校验', desc: '根据最新会计准则，逐条检索异常科目', status: 'active', icon: '🔍' },
+  { title: '风险评级', desc: '多因子评估风险等级，标记高危交易', status: 'pending', icon: '⚠️' },
+  { title: '报告生成', desc: '自动生成 50 页审计初稿并附带底稿链接', status: 'pending', icon: '📄' }
+]" />
 
-<div class="grid grid-cols-3 gap-3">
-<div class="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-<div class="text-xl mb-2 text-center">🔄</div>
-<h3 class="!text-xs font-bold text-slate-800 text-center !mb-2">双跑验证</h3>
-<div class="space-y-1.5 text-[11px] text-slate-600">
-<div class="flex items-start gap-1"><span class="text-emerald-500">✓</span>P0 任务双跑至少 3 个工作日</div>
-<div class="flex items-start gap-1"><span class="text-emerald-500">✓</span>自动化 diff 脚本逐行校验产出</div>
-<div class="flex items-start gap-1"><span class="text-emerald-500">✓</span>差异率 < 0.01% 方可通过</div>
-</div>
-</div>
-<div v-click class="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-<div class="text-xl mb-2 text-center">📋</div>
-<h3 class="!text-xs font-bold text-slate-800 text-center !mb-2">回滚预案</h3>
-<div class="space-y-1.5 text-[11px] text-slate-600">
-<div class="flex items-start gap-1"><span class="text-emerald-500">✓</span>每批次保留 TBDS 全量配置快照</div>
-<div class="flex items-start gap-1"><span class="text-emerald-500">✓</span>异常情况 30 分钟内回退</div>
-<div class="flex items-start gap-1"><span class="text-emerald-500">✓</span>切换后 TBDS 保持 2 周冷备</div>
-</div>
-</div>
-<div v-click class="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-<div class="text-xl mb-2 text-center">👥</div>
-<h3 class="!text-xs font-bold text-slate-800 text-center !mb-2">团队保障</h3>
-<div class="space-y-1.5 text-[11px] text-slate-600">
-<div class="flex items-start gap-1"><span class="text-emerald-500">✓</span>腾讯 WeData 团队全程驻场</div>
-<div class="flex items-start gap-1"><span class="text-emerald-500">✓</span>7×24 专项值班机制</div>
-<div class="flex items-start gap-1"><span class="text-emerald-500">✓</span>每日迁移进度晨会同步</div>
-</div>
-</div>
-</div>
-
-<div v-click class="mt-3 theme-callout rounded-lg p-3 flex items-center gap-3">
-<div class="theme-bg-light w-8 h-8 rounded-lg flex items-center justify-center text-base shrink-0">📚</div>
-<div>
-<h4 class="!text-xs font-bold theme-text !mb-0">业务团队培训计划</h4>
-<p class="text-slate-600 !text-[11px] !mt-0.5">迁移期间安排 2 场 WeData 操作培训（各 2 小时），SQL 语法 100% 兼容，学习成本极低。</p>
-</div>
-</div>
-
----
-layout: custom
-transition: slide-left
----
-
-# 📈 预期收益与成功标准
-
-<p class="text-xs text-slate-500 mb-3">迁移完成后，中金财富数据中台将在效率、治理、成本三方面获得显著提升。</p>
-
-<div class="grid grid-cols-3 gap-3">
-<DataCard title="开发效率" value="提升 50%" :trend="50" colorVariant="emerald">
-<template #icon>⚡</template>
-可视化开发替代手写脚本，任务上线周期从 3 天缩短至半天。
+<div class="mt-8 grid grid-cols-3 gap-3">
+<DataCard title="效率增幅" value="18 倍" :trend="85" colorVariant="emerald">
+<template #icon>📈</template>
+处理 1 万条数据从 2 天缩短至 1.5 小时。
 </DataCard>
-<DataCard v-click title="运维成本" value="降低 40%" :trend="40" colorVariant="blue">
+<DataCard title="覆盖广度" value="100%" :trend="50" colorVariant="blue">
+<template #icon>🎯</template>
+从人工「抽样检查」进化为「全量自动化扫描」。
+</DataCard>
+<DataCard title="单位成本" value="¥ 0.2 /单" :trend="-90" colorVariant="slate">
 <template #icon>💰</template>
-云原生免运维，无需维护 Hadoop 组件版本与集群节点。
-</DataCard>
-<DataCard v-click title="数据治理" value="从 0 到 1" :trend="100" colorVariant="purple">
-<template #icon>🏛️</template>
-血缘追踪、质量监控、权限管控全面覆盖 2000+ 张表。
+Token 费用远低于专业审计员的人工时费。
 </DataCard>
 </div>
 
-<div v-click class="mt-3 bg-white rounded-xl p-3 border border-slate-100 shadow-sm">
-<h3 class="!text-xs font-bold text-slate-800 !mb-2">🎯 迁移验收 KPI</h3>
-<div class="grid grid-cols-4 gap-3">
-<div class="text-center">
-<div class="text-lg font-black theme-text">99.8%</div>
-<div class="text-[10px] text-slate-500">任务迁移成功率</div>
+---
+layout: custom
+---
+
+<p class="text-xs text-slate-500 mb-3">行业图谱 · INDUSTRY LANDSCAPE</p>
+<h1 class="!mb-6">全行业 Agent 应用机会图谱</h1>
+
+<div class="grid grid-cols-3 gap-3">
+<div class="p-3 bg-red-50 rounded-xl border border-red-100">
+  <b class="text-[11px] text-red-800 block mb-2 font-bold uppercase">🏦 金融与风控</b>
+  <p class="text-[9px] text-red-600/80 leading-relaxed">
+    • 智能投研：Agent 自动聚合财报<br/>
+    • 欺诈识别：实时分析异常链路<br/>
+    • 自动化合规：准则自动对标
+  </p>
 </div>
-<div class="text-center">
-<div class="text-lg font-black theme-text">0</div>
-<div class="text-[10px] text-slate-500">数据丢失事件</div>
+<div class="p-3 bg-blue-50 rounded-xl border border-blue-100">
+  <b class="text-[11px] text-blue-800 block mb-2 font-bold uppercase">💻 IT 与开发</b>
+  <p class="text-[9px] text-blue-600/80 leading-relaxed">
+    • 自主修复：Agent 监控日志并修补<br/>
+    • 自动化测试：模拟真实用户点击<br/>
+    • 遗留代码迁移：Cobol 转 Java
+  </p>
 </div>
-<div class="text-center">
-<div class="text-lg font-black theme-text">&lt;30min</div>
-<div class="text-[10px] text-slate-500">最大回滚耗时</div>
-</div>
-<div class="text-center">
-<div class="text-lg font-black theme-text">100%</div>
-<div class="text-[10px] text-slate-500">培训覆盖率</div>
-</div>
+<div class="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+  <b class="text-[11px] text-emerald-800 block mb-2 font-bold uppercase">🛒 零售与营销</b>
+  <p class="text-[9px] text-emerald-600/80 leading-relaxed">
+    • 虚拟导购：基于用户画像导流<br/>
+    • 库存优化：Agent 预测需求并补货<br/>
+    • 自动化宣发：生成多模态素材
+  </p>
 </div>
 </div>
 
 ---
 layout: custom
-transition: view-transition
 ---
 
-# 🗣️ 同行业成功案例
+<p class="text-xs text-slate-500 mb-3">方法论：落地路径 · IMPLEMENTATION</p>
+<h1 class="!mb-6">企业级 Agent 平台落地路线图</h1>
 
-<p class="text-xs text-slate-500 mb-3">多家头部金融机构已完成 TBDS/CDH → WeData 的平滑迁移。</p>
-
-<div class="grid grid-cols-3 gap-3 items-start">
-<QuoteCard author="某头部券商" role="数据中台负责人">
-迁移后调度稳定性提升 40%，数据质量问题较同期下降 60%。从立项到上线仅用了 8 周。
-</QuoteCard>
-<QuoteCard v-click author="某城商行" role="科技部总经理">
-WeData 内置的血缘分析让我们第一次摸清了 2000+ 张表的依赖链路，治理效率质的飞跃。
-</QuoteCard>
-<QuoteCard v-click author="某基金公司" role="IT 架构师">
-云原生架构让我们实现弹性扩缩容，季末批处理高峰算力成本降低了 35%，效果超预期。
-</QuoteCard>
+<div class="space-y-4">
+<div v-click class="flex gap-4 items-center">
+  <div class="w-10 h-10 bg-slate-900 text-white rounded-lg flex items-center justify-center font-bold">P1</div>
+  <div class="flex-1 border-b border-slate-100 pb-2">
+    <b class="text-xs text-slate-800">基础设施建设：</b> 搭建企业级大模型网关、向量数据库及工具 API 市场。
+  </div>
+</div>
+<div v-click class="flex gap-4 items-center">
+  <div class="w-10 h-10 bg-red-500 text-white rounded-lg flex items-center justify-center font-bold">P2</div>
+  <div class="flex-1 border-b border-slate-100 pb-2">
+    <b class="text-xs text-slate-800">高价值场景 Pilot：</b> 选择「重复性高、容错率适中、数据丰富」的场景进行试点（如 IT 运维）。
+  </div>
+</div>
+<div v-click class="flex gap-4 items-center">
+  <div class="w-10 h-10 bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold">P3</div>
+  <div class="flex-1 border-b border-slate-100 pb-2">
+    <b class="text-xs text-slate-800">多智能体组织化：</b> 实现跨部门 Agent 协作，构建企业内部的「数字员工矩阵」。
+  </div>
+</div>
 </div>
 
-<div v-click class="mt-3 bg-white rounded-lg p-3 shadow-sm border border-slate-100 flex items-center gap-3">
-<div class="text-2xl shrink-0">✅</div>
+---
+layout: custom
+---
+
+<p class="text-xs text-slate-500 mb-3">冷静观察 · CHALLENGES</p>
+<h1 class="!mb-6">避坑指南：Agent 落地的三大红线</h1>
+
+<ProsCons 
+  prosTitle="你应该关注什么？"
+  consTitle="你应该警惕什么？"
+  :pros="['Human-in-the-loop：关键环节必须有人工确认。', '可追踪性：记录 Agent 每一环节的推理日志。', '工具隔离：必须在沙箱环境中运行执行脚本。']" 
+  :cons="['盲目追求全自动：目前 Agent 步数越多，失败率越高。', 'Token 恐怖主义：由于循环导致的 Token 费用暴涨。', '权限失控：防止 Agent 误删生产环境数据库。']" 
+/>
+
+---
+layout: custom
+---
+
+<p class="text-xs text-slate-500 mb-3">总结与展望 · CONCLUSION</p>
+<h1 class="!mb-6">总结：智能体是 AI 的「终极形态」</h1>
+
+<div class="grid grid-cols-2 gap-8">
 <div>
-<h4 class="!text-xs font-bold text-slate-800 !mb-0">腾讯官方数据</h4>
-<p class="text-slate-500 !text-[11px] !mt-0.5">截至 2024 上半年，累计协助 120+ 企业完成迁移，金融行业客户占比 35%，任务迁移成功率 99.8%。</p>
+  <p class="text-[11px] text-slate-500 leading-relaxed mb-6">
+    如果说 2023 年是模型的竞赛，那么 2024 年就是 **Agent 的应用元年**。
+  </p>
+  <div class="space-y-4">
+    <div class="flex items-center gap-3">
+      <div class="w-2 h-2 rounded-full bg-red-500"></div>
+      <p class="text-xs font-bold">从「聊天」到「干活」</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+      <p class="text-xs font-bold">从「单兵」到「军团」</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+      <p class="text-xs font-bold">从「工具」到「员工」</p>
+    </div>
+  </div>
+</div>
+<div class="flex items-center justify-center">
+  <div class="relative">
+    <div class="w-32 h-32 rounded-full bg-red-500/10 flex items-center justify-center animate-ping absolute"></div>
+    <div class="w-32 h-32 rounded-full bg-red-500 flex items-center justify-center relative z-10 shadow-xl">
+      <span class="text-white font-bold text-center leading-tight">THE<br/>FUTURE<br/>IS NOW</span>
+    </div>
+  </div>
 </div>
 </div>
 
 ---
 layout: custom
+class: theme-dark-ending
 ---
 
-<div class="theme-dark-ending absolute inset-0 z-50 flex flex-col items-center justify-center text-center px-10 overflow-hidden">
-<div class="relative w-full max-w-3xl mx-auto flex flex-col items-center">
-<div class="absolute w-[400px] h-[400px] bg-white rounded-full mix-blend-overlay filter blur-[120px] opacity-10"></div>
-<div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl mb-5 relative z-10 backdrop-blur-sm border border-white/10">🚀</div>
-<h1 class="!text-4xl font-black text-white tracking-tight leading-tight !mb-3 relative z-10">
-从 TBDS 到 WeData<br/>
-<span class="text-white/60">我们已经准备就绪</span>
-</h1>
-<p class="!text-sm text-white/60 font-light leading-relaxed max-w-2xl relative z-10 !mb-6">
-2024 年，中金财富数据中台将完成全面升级。<br/>
-让我们一起拥抱更智能、更高效的数据开发新范式。
-</p>
-<div class="flex gap-3 relative z-10">
-<div class="px-5 py-2 bg-white theme-text font-bold rounded-xl shadow-lg text-sm">
-联系数据中台团队
-</div>
-<div class="px-5 py-2 bg-white/10 text-white font-medium rounded-xl border border-white/20 backdrop-blur-sm text-sm">
-查看详细迁移手册
-</div>
-</div>
-</div>
+<div class="h-full flex flex-col justify-center items-center text-white text-center px-10">
+  <div v-motion :initial="{opacity:0, scale:0.8}" :enter="{opacity:1, scale:1}">
+    <h1 class="!text-6xl !mb-4">NEXT IS AGENT</h1>
+    <p class="text-white/60 tracking-[0.4em] uppercase text-xs mb-12">智能体是数字化转型的最后一块拼图</p>
+  </div>
+  
+  <div class="grid grid-cols-4 gap-8 mb-12">
+    <div class="text-center">
+      <div class="text-xl font-bold mb-1">200+</div>
+      <div class="text-[9px] text-white/40 uppercase">可用工具 API</div>
+    </div>
+    <div class="text-center border-l border-white/10">
+      <div class="text-xl font-bold mb-1">92%</div>
+      <div class="text-[9px] text-white/40 uppercase">意图识别准确率</div>
+    </div>
+    <div class="text-center border-l border-white/10">
+      <div class="text-xl font-bold mb-1">¥ 0.05</div>
+      <div class="text-[9px] text-white/40 uppercase">平均单次任务成本</div>
+    </div>
+    <div class="text-center border-l border-white/10">
+      <div class="text-xl font-bold mb-1">24/7</div>
+      <div class="text-[9px] text-white/40 uppercase">无间断自动化执行</div>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-6 text-[10px] text-white/30 border-t border-white/5 pt-8 w-full justify-center">
+    <span>中金财富 · 数字化转型系列课</span>
+    <span>版权所有 © 2024</span>
+  </div>
 </div>
