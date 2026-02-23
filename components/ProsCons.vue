@@ -10,8 +10,8 @@ defineProps<{
 <template>
   <div class="grid grid-cols-2 gap-4 w-full">
     <!-- 优势 -->
-    <div class="bg-emerald-50/50 border border-emerald-100 rounded-xl p-4">
-      <div class="flex items-center gap-2 mb-3 text-emerald-700 font-bold">
+    <div class="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3">
+      <div class="flex items-center gap-2 mb-2 text-emerald-700 font-bold">
         <div class="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs">✓</div>
         {{ prosTitle || '优势 / 收益' }}
       </div>
@@ -24,8 +24,8 @@ defineProps<{
     </div>
 
     <!-- 劣势/挑战 -->
-    <div class="bg-rose-50/50 border border-rose-100 rounded-xl p-4">
-      <div class="flex items-center gap-2 mb-3 text-rose-700 font-bold">
+    <div class="bg-rose-50/50 border border-rose-100 rounded-xl p-3">
+      <div class="flex items-center gap-2 mb-2 text-rose-700 font-bold">
         <div class="w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-xs">!</div>
         {{ consTitle || '风险 / 挑战' }}
       </div>

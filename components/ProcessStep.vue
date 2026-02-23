@@ -10,7 +10,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="flex items-start justify-between gap-4 w-full px-4 py-6">
+  <div class="flex items-start justify-between gap-4 w-full px-4 py-2">
     <div v-for="(step, index) in steps" :key="index" class="flex-1 relative">
       <!-- 连接线 -->
       <div v-if="index < steps.length - 1" 
@@ -26,7 +26,7 @@ defineProps<{
           step.status === 'done' ? 'bg-red-500 border-red-500 text-white' : 
           'bg-slate-50 border-slate-200 text-slate-400'
         ]">
-          <span v-if="step.icon">{{ step.icon }}</span>
+          <div v-if="step.icon" :class="[step.icon, 'text-sm']"></div>
           <span v-else class="text-sm font-bold">{{ index + 1 }}</span>
         </div>
         <h4 :class="['font-bold text-sm mb-1', step.status === 'active' ? 'text-red-600' : 'text-slate-700']">

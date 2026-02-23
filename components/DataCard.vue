@@ -38,6 +38,7 @@ const colorClass = computed(() => {
     emerald: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
     purple: 'bg-purple-50 text-purple-600 border border-purple-100',
     rose: 'bg-rose-50 text-rose-600 border border-rose-100',
+    orange: 'bg-orange-50 text-orange-600 border border-orange-100',
   }
   return map[props.colorVariant] || map.blue
 })

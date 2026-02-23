@@ -9,7 +9,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="flex items-center justify-center gap-2 py-8">
+  <div class="flex items-center justify-center gap-2 py-3">
     <template v-for="(node, index) in nodes" :key="index">
       <!-- 节点卡片 -->
       <div :class="[

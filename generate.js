@@ -85,6 +85,7 @@ function buildSystemPrompt(components) {
 4. **组件内容饱满**：在使用任何组件（如 CompareTable, DataCard, ProcessStep 等）时，里面的文字描述（description, content）必须非常丰富，不要只是两三个字，要有一句完整且专业的解释。
 5. **多页展开**：不要把所有内容挤在 3 页里！遇到大话题，必须拆分成至少 15-20 页以上的深度剖析。
 6. **Slidev 规范**：所有 HTML/Vue 组件标签必须 **顶格书写**，不要缩进。
+7. **单页不溢出 (极其重要！)**：每一页的内容必须能在一个 960x700 像素的视口内完整显示，**绝对不允许内容溢出到屏幕下方被截断**！如果一页内容过多，必须拆分成多页。每页最多放 2-3 个组件 + 1 段简短文字，或 1 个大型组件（如 CompareTable）+ 1 段文字。宁可多拆页，也不要让单页塞太满。
 
 ## 🎨 品牌与工具类 (必须优先使用)
 不要使用硬编码色值，使用以下工具类保持品牌一致性：
@@ -146,7 +147,7 @@ async function callGemini(systemPrompt, userPrompt) {
     ],
     generationConfig: {
       temperature: 0.6,
-      maxOutputTokens: 8192
+      maxOutputTokens: 65536
     }
   };
 
@@ -173,6 +174,33 @@ async function callGemini(systemPrompt, userPrompt) {
 
   // 核心修复：清理所有行首的缩进空格，防止 Markdown 将嵌套 HTML 组件错误解析为代码块
   text = text.split('\n').map(line => line.replace(/^\s+/, '')).join('\n');
+
+  // ── 截断自动修复 ──
+  // 检测是否被 token limit 截断（未闭合的 HTML 标签）
+  const openTags = (text.match(/<[a-zA-Z][^/>]*>/g) || []).length;
+  const closeTags = (text.match(/<\/[a-zA-Z]+>/g) || []).length;
+  const selfCloseTags = (text.match(/<[^>]+\/>/g) || []).length;
+
+  if (openTags - selfCloseTags > closeTags + 2) {
+    console.warn('⚠️  检测到 AI 输出被截断（未闭合标签），正在自动修复...');
+    // 从末尾向前找到最后一个完整的 slide 分隔符 ---
+    const slides = text.split(/^---$/m);
+    // 去掉被截断的最后一段（不完整的那页）
+    while (slides.length > 2) {
+      const lastSlide = slides[slides.length - 1];
+      const lastOpen = (lastSlide.match(/<[a-zA-Z][^/>]*>/g) || []).length;
+      const lastClose = (lastSlide.match(/<\/[a-zA-Z]+>/g) || []).length;
+      const lastSelf = (lastSlide.match(/<[^>]+\/>/g) || []).length;
+      if (lastOpen - lastSelf <= lastClose + 1) break; // 这页是完整的
+      slides.pop(); // 丢弃不完整的页
+      slides.pop(); // 丢弃它的 frontmatter
+    }
+    text = slides.join('---');
+
+    // 追加结尾页
+    text += `\n\n---\nlayout: custom\nclass: theme-dark-ending\n---\n\n<div class="flex flex-col items-center justify-center h-full text-white">\n<h2 class="text-4xl font-bold mb-4 tracking-widest">THANK YOU</h2>\n<div class="w-16 h-1 bg-white opacity-30 mb-6"></div>\n<p class="text-lg opacity-70">感谢观看</p>\n</div>`;
+    console.log('✅ 截断修复完成，已保留完整页面并追加结尾页');
+  }
 
   return text.trim();
 }
@@ -263,7 +291,8 @@ PPT Agent 生成脚本
   // 写入 slides.md
   const slidesPath = path.join(__dirname, 'slides.md');
   fs.writeFileSync(slidesPath, slidesContent + '\n', 'utf-8');
-  console.log(`✅ slides.md 已生成 (${slidesContent.split('---').length - 1} 页)`);
+  const actualSlideCount = Math.floor((slidesContent.split(/^---$/m).length - 1) / 2) + 1;
+  console.log(`✅ slides.md 已生成 (约 ${actualSlideCount} 页)`);
 
   // 导出
   if (!skipExport) {

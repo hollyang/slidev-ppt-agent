@@ -13,7 +13,7 @@
     </header>
 
     <!-- 主内容区 -->
-    <main class="custom-main w-full h-full pt-14 pb-8 px-8 overflow-hidden">
+    <main class="custom-main w-full h-full pt-12 pb-6 px-8 overflow-y-auto">
       <slot />
     </main>
 

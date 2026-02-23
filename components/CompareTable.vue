@@ -22,6 +22,17 @@ const props = defineProps({
   newColor: { type: String, default: 'emerald' }
 })
 
-const oldBgClass = computed(() => `bg-${props.oldColor}-50 text-${props.oldColor}-700`)
-const newBgClass = computed(() => `bg-${props.newColor}-50 text-${props.newColor}-700`)
+const colorMap = {
+  slate: 'bg-slate-50 text-slate-700',
+  emerald: 'bg-emerald-50 text-emerald-700',
+  blue: 'bg-blue-50 text-blue-700',
+  red: 'bg-red-50 text-red-700',
+  purple: 'bg-purple-50 text-purple-700',
+  orange: 'bg-orange-50 text-orange-700',
+  amber: 'bg-amber-50 text-amber-700',
+  rose: 'bg-rose-50 text-rose-700',
+}
+
+const oldBgClass = computed(() => colorMap[props.oldColor] || colorMap.slate)
+const newBgClass = computed(() => colorMap[props.newColor] || colorMap.emerald)
 </script>
