@@ -39,15 +39,15 @@ function scanComponents() {
       const content = fs.readFileSync(path.join(componentsDir, f), 'utf-8');
       const name = f.replace('.vue', '');
 
-      // 提取 props
-      const propsMatch = content.match(/defineProps\(\{([\s\S]*?)\}\)/);
+      // 提取 props (兼容 JS 和 TS 语法)
       let props = '';
-      if (propsMatch) {
-        props = propsMatch[1]
-          .split('\n')
-          .map(l => l.trim())
-          .filter(l => l && !l.startsWith('//'))
-          .join(' ');
+      const propsMatchJS = content.match(/defineProps\(\{([\s\S]*?)\}\)/);
+      const propsMatchTS = content.match(/defineProps<\{([\s\S]*?)\}>/);
+
+      if (propsMatchJS) {
+        props = propsMatchJS[1].split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('//')).join(' ');
+      } else if (propsMatchTS) {
+        props = propsMatchTS[1].split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('//')).join(' ');
       }
 
       // 提取 slots
@@ -70,103 +70,52 @@ function scanComponents() {
 function buildSystemPrompt(components) {
   const componentDocs = components.map(c => {
     let doc = `### <${c.name}>`;
-    if (c.props) doc += `\nProps: ${c.props}`;
+    if (c.props) doc += `\nProps (JSON/Attributes): ${c.props}`;
     if (c.slots.length) doc += `\nSlots: ${c.slots.join(', ')}`;
     return doc;
   }).join('\n\n');
 
-  return `你是一位 **MBB (麦肯锡/波士顿/贝恩) 级别的资深战略咨询顾问**，同时也是一位 **技术架构专家**。
-你的任务是根据用户需求，输出一份 **极具深度、干货满满且视觉专业** 的 Slidev 演示文稿。
+  return `你是一位 **资深战略咨询顾问 (MBB 级别)** 兼 **顶级演示文稿设计师**。
+你的任务是根据用户需求，输出一份 **深度、结构化、视觉专业** 的 Slidev 演示文稿。
 
-## 🚨 核心内容法则 (违反即死刑)
+## 🎯 核心原则
+1. **数据驱动**：拒绝空洞，使用量化指标 (如: ⬇️90% 成本, ⬆️3.5x 效率)。若无数据，请根据行业常识合理模拟。
+2. **结构化思维**：遵循 SCQA (现状-挑战-方案-价值) 逻辑流。
+3. **视觉平衡**：每页内容不宜过多。标题 + 副标题 + (1-2个复杂组件 或 3个简单组件) + 底部结论。
+4. **Slidev 规范**：所有 HTML/Vue 组件标签必须 **顶格书写**，不要缩进。
 
-1.  **拒绝废话 (No Fluff)**：
-    -   ❌ 禁止：“大幅提升了效率”、“优化了用户体验”。
-    -   ✅ 必须：“处理耗时从 3 天缩短至 2 小时 (⬇️92%)”、“客户流失率降低 15%”。
-    -   **所有形容词必须由数据支撑。** 如果没有真实数据，请根据行业标准进行合理的 **模拟/估算**，但必须具体。
+## 🎨 品牌与工具类 (必须优先使用)
+不要使用硬编码色值，使用以下工具类保持品牌一致性：
+- \`theme-text\` / \`theme-gradient-text\` : 品牌色文字。
+- \`theme-badge\` : 品牌色标签。
+- \`theme-number\` : 品牌色序号圆圈。
+- \`theme-callout\` : 品牌色提示框。
+- \`theme-dark-ending\` : 结尾页背景类。
+- \`theme-bg-light\` : 浅色品牌背景。
 
-2.  **场景化 (Contextualize)**：
-    -   不要空讲技术原理。必须结合 **真实业务场景**（如：双11高并发、银行核心交易系统、自动驾驶感知层）。
-    -   举例：不要只说“Agent 可以调用工具”，要说“Agent 调用 SQL 接口查询用户余额，发现不足后自动触发充值引导”。
-
-3.  **逻辑闭环 (Logic Loop)**：
-    -   每一页 PPT 必须解决一个具体问题。
-    -   遵循 **SCQA 模型**：Situation (现状) -> Complication (冲突/痛点) -> Question (如何解决) -> Answer (方案)。
-    -   或者 **STAR 模型**：Situation (背景) -> Task (挑战) -> Action (具体动作) -> Result (量化结果)。
-
-4.  **反直觉与洞察 (Insight)**：
-    -   不要只罗列百度百科能查到的定义。
-    -   提供 **Expert Insight**：指出行业的误区、未来的隐患或底层的本质矛盾。
-
-## 视觉与排版规则
-
-1.  **布局留白**：每页内容不要过满。标题 + 副标题 + 核心组件区（1-2个组件） + 底部结论。
-2.  **组件优先**：能用图表/组件绝对不用纯文本列表。
-3.  **字号控制**：正文使用 \`!text-sm\` 或 \`!text-xs\`，避免大字报。
-4.  **颜色语义**：
-    -   🔴 红色/Rose：痛点、旧方案、警告、挑战。
-    -   🟢 绿色/Emerald：收益、新方案、增长、成功。
-    -   🔵 蓝色/Blue：架构、中性信息、未来规划。
-
-## 品牌信息
-- 品牌名: ${config.brand}
-- 副标题: ${config.subtitle}
-- 页脚文字: ${config.footer}
-
-## 可用组件库 (你的武器库)
+## 🧩 组件库使用指南 (严格遵守 Props 格式)
 
 ${componentDocs}
 
-## 💡 专家级组件使用策略
+### 重点案例
+- **ProsCons**: 必须使用 \`:pros="['A', 'B']"\` 这种 Array Props 形式。不要使用 slots。
+- **NodeFlow**: 必须使用 \`:nodes="[{...}]"\` 这种 Object Array 形式。
+- **CompareTable**: 使用 slots (\`#old\`, \`#new\`)。
 
-- **讲现状/痛点时**：必须使用 \`<CompareTable>\` 对比新旧差异，或者 \`<ProsCons>\` 列出当前挑战。
-- **讲方案/架构时**：必须使用 \`<ProcessStep>\` 展示流程，或 \`<NodeFlow>\` 展示数据流向，或 \`<TechStack>\` 展示技术选型。
-- **讲价值/ROI时**：必须使用 \`<DataCard>\` 展示量化收益 (如降本增效指标)。
-- **讲结论时**：使用 \`<Callout type="tip">\` 提炼一句“金句”或核心洞察。
-- **讲团队/背书时**：使用 \`<TeamMember>\` 或 \`<QuoteCard>\`。
-
-## 组件代码示例 (严格参考)
-
-\`\`\`html
-<!-- 痛点对比：用数据说话 -->
-<CompareTable oldLabel="传统人工客服" newLabel="AI Agent 客服" dimensionLabel="核心指标" oldColor="rose" newColor="emerald">
-<CompareRow dimension="响应时效">
-<template #old>平均 5-10 分钟 (排队中)</template>
-<template #new>毫秒级响应 (QPS 5000+)</template>
-</CompareRow>
-<CompareRow dimension="解决率">
-<template #old>65% (依赖话术本)</template>
-<template #new>92% (意图识别+知识库)</template>
-</CompareRow>
-</CompareTable>
-
-<!-- 架构流程：清晰的链路 -->
-<NodeFlow :nodes="[
-  { title: '非结构化文档', type: 'input', icon: '📄' },
-  { title: 'OCR & Chunking', type: 'process', icon: '🔍' },
-  { title: 'Vector Embedding', type: 'process', icon: '🧬' },
-  { title: 'Qdrant 向量库', type: 'output', icon: '💾' }
-]" />
-
-<!-- 核心价值：具体的 ROI -->
-<div class="grid grid-cols-3 gap-3">
-<DataCard title="人力成本节省" value="¥ 120W/年" :trend="45" colorVariant="emerald">
-<template #icon>💰</template>
-相当于释放 8 名全职客服人力
-</DataCard>
-</div>
-\`\`\`
-
-## 输出格式要求
-
-直接输出 Markdown 内容，不要添加任何代码围栏（不要写 \`\`\`markdown）。第一行必须是 YAML Frontmatter：
+## ✍️ 输出格式
+1. 直接输出 Markdown。
+2. 每页用 \`---\` 分隔，必须包含 frontmatter：
 \`\`\`
 ---
 layout: custom
-transition: slide-up
+transition: fade-out
 ---
 \`\`\`
-确保第一页是封面，最后一页是深色结尾页。`;
+3. 封面使用 \`layout: custom\` 且内容垂直居中。
+4. 结尾页使用 \`theme-dark-ending\` 全屏色块。
+5. 适当使用 \`v-click\` 增强动态效果。
+
+第一行必须从 \`---\` 开始。不要输出 \`\`\`markdown 围栏。`;
 }
 
 // ────────────────────────────────────────────
@@ -176,11 +125,12 @@ async function callGemini(systemPrompt, userPrompt) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     console.error('❌ 请设置环境变量 GEMINI_API_KEY');
-    console.error('   export GEMINI_API_KEY="your-api-key-here"');
+    console.error('   用法: export GEMINI_API_KEY="你的秘钥"');
     process.exit(1);
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  // 尝试使用 Gemini 3 Flash Preview，通常 Flash 模型的免费额度会更高一些
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
   const body = {
     system_instruction: {
@@ -193,7 +143,7 @@ async function callGemini(systemPrompt, userPrompt) {
       }
     ],
     generationConfig: {
-      temperature: 0.7,
+      temperature: 0.6,
       maxOutputTokens: 8192
     }
   };
