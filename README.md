@@ -31,12 +31,20 @@ npm install
 在使用 AI 生成功能前，请获取 [Gemini API Key](https://aistudio.google.com/app/apikey)。
 ```bash
 export GEMINI_API_KEY="你的_API_KEY"
+# 可选：覆盖默认模型与请求策略
+export GEMINI_MODEL="gemini-2.0-flash"
+export GEMINI_TIMEOUT_MS="45000"
+export GEMINI_MAX_RETRIES="3"
 ```
 
 ### 3. 一键生成幻灯片
 ```bash
 # 示例：生成一份 Agent 入门分享
 node generate.js "帮我写一份关于 AI Agent 的深度技术分享，包含架构拆解和金融落地案例"
+# 仅生成并跳过导出
+node generate.js "需求描述" --no-export
+# 如需临时跳过质量校验（不建议）
+node generate.js "需求描述" --skip-qa
 ```
 
 ### 4. 预览与导出
@@ -62,7 +70,11 @@ npm run export:pptx
     "colors": {
         "primary": "red",
         "accent": "rose"
-    }
+    },
+    "font": "Inter",
+    "model": "gemini-2.0-flash",
+    "requestTimeoutMs": 45000,
+    "maxRetries": 3
 }
 ```
 
@@ -72,6 +84,7 @@ npm run export:pptx
 2. **Strategy**: 构造 System Prompt，注入 SCQA 逻辑与行业洞察。
 3. **Execution**: 调用 Gemini 模型生成符合 Slidev 语法的 Markdown。
 4. **Validation**: 自动通过 Slidev 编译器进行语法校验并导出。
+5. **Quality Gate**: 生成后自动执行结构与内容校验（frontmatter、标签闭合、数字结论来源提示）。
 
 ---
 Made with ❤️ by Slidev PPT Agent

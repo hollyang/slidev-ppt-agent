@@ -2,10 +2,10 @@
   <div class="mb-2">
     <div class="flex justify-between items-center mb-1">
       <span class="text-[11px] font-bold text-slate-700">{{ label }}</span>
-      <span class="text-[11px] font-bold" :class="valueColorClass">{{ value }}%</span>
+      <span class="text-[11px] font-bold" :style="valueStyle">{{ value }}%</span>
     </div>
     <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-      <div class="h-2 rounded-full transition-all duration-700" :class="barColorClass" :style="{ width: value + '%' }"></div>
+      <div class="h-2 rounded-full transition-all duration-700" :style="{ ...barStyle, width: value + '%' }"></div>
     </div>
     <div v-if="$slots.default" class="text-[10px] text-slate-400 mt-0.5"><slot /></div>
   </div>
@@ -20,24 +20,24 @@ const props = defineProps({
   color: { type: String, default: 'blue' }
 })
 
-const barColorClass = computed(() => {
+const barStyle = computed(() => {
   const map = {
-    blue: 'bg-blue-500',
-    red: 'bg-red-500',
-    emerald: 'bg-emerald-500',
-    purple: 'bg-purple-500',
-    amber: 'bg-amber-500'
+    blue: { backgroundColor: 'var(--theme-info-text)' },
+    red: { backgroundColor: 'var(--theme-danger-solid)' },
+    emerald: { backgroundColor: 'var(--theme-success-solid)' },
+    purple: { backgroundColor: 'var(--theme-tip-solid)' },
+    amber: { backgroundColor: 'var(--theme-warning-solid)' }
   }
   return map[props.color] || map.blue
 })
 
-const valueColorClass = computed(() => {
+const valueStyle = computed(() => {
   const map = {
-    blue: 'text-blue-600',
-    red: 'text-red-600',
-    emerald: 'text-emerald-600',
-    purple: 'text-purple-600',
-    amber: 'text-amber-600'
+    blue: { color: 'var(--theme-info-text)' },
+    red: { color: 'var(--theme-danger-text)' },
+    emerald: { color: 'var(--theme-success-text)' },
+    purple: { color: 'var(--theme-tip-text)' },
+    amber: { color: 'var(--theme-warning-text)' }
   }
   return map[props.color] || map.blue
 })

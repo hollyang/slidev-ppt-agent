@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-slate-100 p-4 transition-all duration-300 hover:shadow-[0_4px_20px_rgb(0,0,0,0.08)] hover:-translate-y-0.5">
     <div class="flex items-center gap-3 mb-2">
-      <div :class="`w-9 h-9 rounded-lg flex items-center justify-center text-lg ${colorClass}`">
+      <div class="w-9 h-9 rounded-lg flex items-center justify-center text-lg border" :style="iconStyle">
         <slot name="icon"></slot>
       </div>
       <div>
@@ -9,7 +9,7 @@
         <div class="text-xl font-bold text-slate-800 tracking-tight leading-tight">{{ value }}</div>
       </div>
     </div>
-    <div class="text-xs font-medium" :class="trend > 0 ? 'text-emerald-500' : 'text-rose-500'">
+    <div class="text-xs font-medium" :style="trendStyle">
       <span class="font-bold">{{ trend > 0 ? '+' : '' }}{{ trend }}%</span>
       <span class="text-slate-400 font-normal ml-1">vs last quarter</span>
     </div>
@@ -32,14 +32,18 @@ const props = defineProps({
   }
 })
 
-const colorClass = computed(() => {
+const iconStyle = computed(() => {
   const map = {
-    blue: 'bg-blue-50 text-blue-600 border border-blue-100',
-    emerald: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
-    purple: 'bg-purple-50 text-purple-600 border border-purple-100',
-    rose: 'bg-rose-50 text-rose-600 border border-rose-100',
-    orange: 'bg-orange-50 text-orange-600 border border-orange-100',
+    blue: { backgroundColor: 'var(--theme-info-bg)', color: 'var(--theme-info-text)', borderColor: 'var(--theme-info-border)' },
+    emerald: { backgroundColor: 'var(--theme-success-bg)', color: 'var(--theme-success-text)', borderColor: 'var(--theme-success-border)' },
+    purple: { backgroundColor: 'var(--theme-tip-bg)', color: 'var(--theme-tip-text)', borderColor: 'var(--theme-tip-border)' },
+    rose: { backgroundColor: 'var(--theme-danger-bg)', color: 'var(--theme-danger-text)', borderColor: 'var(--theme-danger-border)' },
+    orange: { backgroundColor: 'var(--theme-warning-bg)', color: 'var(--theme-warning-text)', borderColor: 'var(--theme-warning-border)' }
   }
   return map[props.colorVariant] || map.blue
 })
+
+const trendStyle = computed(() => ({
+  color: props.trend > 0 ? 'var(--theme-success-solid)' : 'var(--theme-danger-solid)'
+}))
 </script>

@@ -2,9 +2,9 @@
   <div class="rounded-xl overflow-hidden border border-slate-100 shadow-sm">
     <!-- 表头 -->
     <div class="grid grid-cols-3 text-xs font-bold">
-      <div class="bg-slate-50 p-2 text-slate-500 text-center border-b border-r border-slate-100">{{ dimensionLabel || '对比维度' }}</div>
-      <div class="p-2 text-center border-b border-r" :class="oldBgClass">{{ oldLabel }}</div>
-      <div class="p-2 text-center border-b" :class="newBgClass">{{ newLabel }}</div>
+      <div class="p-2 text-center border-b border-r border-slate-100 ct-dimension">{{ dimensionLabel || '对比维度' }}</div>
+      <div class="p-2 text-center border-b border-r" :style="oldHeaderStyle">{{ oldLabel }}</div>
+      <div class="p-2 text-center border-b" :style="newHeaderStyle">{{ newLabel }}</div>
     </div>
     <!-- 行 -->
     <slot />
@@ -23,16 +23,23 @@ const props = defineProps({
 })
 
 const colorMap = {
-  slate: 'bg-slate-50 text-slate-700',
-  emerald: 'bg-emerald-50 text-emerald-700',
-  blue: 'bg-blue-50 text-blue-700',
-  red: 'bg-red-50 text-red-700',
-  purple: 'bg-purple-50 text-purple-700',
-  orange: 'bg-orange-50 text-orange-700',
-  amber: 'bg-amber-50 text-amber-700',
-  rose: 'bg-rose-50 text-rose-700',
+  slate: { backgroundColor: 'var(--theme-neutral-bg)', color: 'var(--theme-neutral-text)' },
+  emerald: { backgroundColor: 'var(--theme-success-bg)', color: 'var(--theme-success-text)' },
+  blue: { backgroundColor: 'var(--theme-info-bg)', color: 'var(--theme-info-text)' },
+  red: { backgroundColor: 'var(--theme-danger-bg)', color: 'var(--theme-danger-text)' },
+  purple: { backgroundColor: 'var(--theme-tip-bg)', color: 'var(--theme-tip-text)' },
+  orange: { backgroundColor: 'var(--theme-warning-bg)', color: 'var(--theme-warning-text)' },
+  amber: { backgroundColor: 'var(--theme-warning-bg)', color: 'var(--theme-warning-text)' },
+  rose: { backgroundColor: 'var(--theme-danger-bg)', color: 'var(--theme-danger-text)' }
 }
 
-const oldBgClass = computed(() => colorMap[props.oldColor] || colorMap.slate)
-const newBgClass = computed(() => colorMap[props.newColor] || colorMap.emerald)
+const oldHeaderStyle = computed(() => colorMap[props.oldColor] || colorMap.slate)
+const newHeaderStyle = computed(() => colorMap[props.newColor] || colorMap.emerald)
 </script>
+
+<style scoped>
+.ct-dimension {
+  background-color: var(--theme-neutral-bg);
+  color: var(--theme-neutral-text);
+}
+</style>

@@ -25,6 +25,38 @@
 
     /* ━━━ 页面背景 ━━━ */
     --theme-bg: #faf8f7;
+
+    /* ━━━ 字体 ━━━ */
+    --theme-font-family: Inter;
+
+    /* ━━━ 语义色（组件可复用） ━━━ */
+    --theme-info-bg: #eef6ff;
+    --theme-info-border: #93c5fd;
+    --theme-info-text: #1d4ed8;
+
+    --theme-success-bg: #ecfdf5;
+    --theme-success-border: #6ee7b7;
+    --theme-success-text: #047857;
+    --theme-success-solid: #10b981;
+
+    --theme-warning-bg: #fffbeb;
+    --theme-warning-border: #fcd34d;
+    --theme-warning-text: #b45309;
+    --theme-warning-solid: #f59e0b;
+
+    --theme-danger-bg: #fff1f2;
+    --theme-danger-border: #fda4af;
+    --theme-danger-text: #be123c;
+    --theme-danger-solid: #f43f5e;
+
+    --theme-tip-bg: #f5f3ff;
+    --theme-tip-border: #c4b5fd;
+    --theme-tip-text: #6d28d9;
+    --theme-tip-solid: #8b5cf6;
+
+    --theme-neutral-bg: #f8fafc;
+    --theme-neutral-border: #e2e8f0;
+    --theme-neutral-text: #475569;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
