@@ -59,6 +59,20 @@ npm run export:pdf
 npm run export:pptx
 ```
 
+### 5. 本地 Web Studio（可视化流程）
+```bash
+npm run web:dev
+# 打开 http://localhost:3031
+```
+
+Web Studio 支持：
+- 需求输入并排队执行生成任务
+- 实时查看流程步骤与日志（SSE）
+- 在线修改 `template.config.json`
+- 在线编辑并保存 `slides.md`
+- 内置 Slidev 预览窗口（支持启动/停止/刷新）
+- 一键触发 PDF / PPTX 导出任务
+
 ## ⚙️ 进阶配置
 
 修改 `template.config.json` 即可自定义你的品牌风格：
