@@ -1,14 +1,14 @@
 {
-    "brand": "中金财富",
-    "subtitle": "数据平台迁移宣讲",
-    "footer": "中金财富 · 内部资料",
-    "colors": {
-        "primary": "red",
-        "accent": "rose"
-    },
-    "font": "Inter",
-    "exportFormat": "both",
-    "model": "gemini-2.0-flash",
-    "requestTimeoutMs": 45000,
-    "maxRetries": 3
+  "brand": "宇树科技",
+  "subtitle": "数据平台迁移宣讲",
+  "footer": "中金财富 · 内部资料",
+  "colors": {
+    "primary": "蓝色",
+    "accent": "rose"
+  },
+  "font": "Inter",
+  "exportFormat": "pdf",
+  "model": "gemini-3-flash-preview",
+  "requestTimeoutMs": 45000,
+  "maxRetries": 3
 }
