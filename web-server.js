@@ -15,11 +15,13 @@ const PREVIEW_PORT = Number(process.env.WEB_STUDIO_PREVIEW_PORT || 3030);
 const PREVIEW_URL = `http://${PREVIEW_HOST}:${PREVIEW_PORT}`;
 
 const VALID_EXPORT_FORMATS = new Set(['pdf', 'pptx', 'both']);
-const MAX_LOGS = 400;
+const VALID_LLM_PROVIDERS = new Set(['gemini', 'openai']);
+const VALID_OPENAI_WIRE_APIS = new Set(['chat_completions', 'responses']);
+const MAX_LOGS = 1000;
 
 let taskIdSeed = 0;
 let logIdSeed = 0;
-let sessionApiKey = process.env.GEMINI_API_KEY || '';
+let sessionApiKey = process.env.LLM_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || '';
 
 const queue = [];
 let activeTask = null;
@@ -75,6 +77,36 @@ function clampPositiveInteger(value, fallback) {
   return Math.floor(parsed);
 }
 
+function normalizeLlmProvider(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (raw === 'openai' || raw === 'openai-compatible' || raw === 'openai_compatible') return 'openai';
+  if (VALID_LLM_PROVIDERS.has(raw)) return raw;
+  return null;
+}
+
+function normalizeOpenAIWireApi(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (raw === 'chat' || raw === 'chat.completions' || raw === 'chat-completions') return 'chat_completions';
+  if (raw === 'responses') return 'responses';
+  if (VALID_OPENAI_WIRE_APIS.has(raw)) return raw;
+  return null;
+}
+
+function parseBoolean(value) {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value !== 0;
+  if (typeof value === 'string') {
+    const raw = value.trim().toLowerCase();
+    if (raw === '1' || raw === 'true' || raw === 'yes' || raw === 'on') return true;
+    if (raw === '0' || raw === 'false' || raw === 'no' || raw === 'off') return false;
+  }
+  return null;
+}
+
+function hasAnyApiKey() {
+  return Boolean(sessionApiKey || process.env.LLM_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY);
+}
+
 function mergeConfig(current, patch) {
   const next = { ...current };
 
@@ -83,6 +115,60 @@ function mergeConfig(current, patch) {
   if (typeof patch.footer === 'string') next.footer = patch.footer.trim();
   if (typeof patch.font === 'string') next.font = patch.font.trim();
   if (typeof patch.model === 'string') next.model = patch.model.trim();
+  if (typeof patch.llmBaseUrl === 'string') next.llmBaseUrl = patch.llmBaseUrl.trim();
+  if (typeof patch.openaiBaseUrl === 'string') next.llmBaseUrl = patch.openaiBaseUrl.trim();
+  if (typeof patch.llmReasoningEffort === 'string') next.llmReasoningEffort = patch.llmReasoningEffort.trim();
+  if (typeof patch.openaiReasoningEffort === 'string') next.llmReasoningEffort = patch.openaiReasoningEffort.trim();
+
+  if (patch.llmProvider !== undefined) {
+    const provider = normalizeLlmProvider(patch.llmProvider);
+    if (!provider) {
+      throw new Error('llmProvider 仅支持 gemini | openai');
+    }
+    next.llmProvider = provider;
+  }
+
+  if (patch.llmWireApi !== undefined) {
+    const wireApi = normalizeOpenAIWireApi(patch.llmWireApi);
+    if (!wireApi) {
+      throw new Error('llmWireApi 仅支持 chat_completions | responses');
+    }
+    next.llmWireApi = wireApi;
+  }
+  if (patch.openaiWireApi !== undefined) {
+    const wireApi = normalizeOpenAIWireApi(patch.openaiWireApi);
+    if (!wireApi) {
+      throw new Error('openaiWireApi 仅支持 chat_completions | responses');
+    }
+    next.llmWireApi = wireApi;
+  }
+
+  const disableStorageInput = patch.disableResponseStorage !== undefined
+    ? patch.disableResponseStorage
+    : patch.openaiDisableResponseStorage;
+  if (disableStorageInput !== undefined) {
+    const parsed = parseBoolean(disableStorageInput);
+    if (parsed === null) {
+      throw new Error('disableResponseStorage 必须是布尔值');
+    }
+    next.disableResponseStorage = parsed;
+  }
+
+  if (patch.enableWebResearch !== undefined) {
+    const parsed = parseBoolean(patch.enableWebResearch);
+    if (parsed === null) {
+      throw new Error('enableWebResearch 必须是布尔值');
+    }
+    next.enableWebResearch = parsed;
+  }
+
+  if (patch.researchWindowDays !== undefined) {
+    next.researchWindowDays = clampPositiveInteger(patch.researchWindowDays, Number(current.researchWindowDays) || 7);
+  }
+
+  if (patch.researchMaxItems !== undefined) {
+    next.researchMaxItems = clampPositiveInteger(patch.researchMaxItems, Number(current.researchMaxItems) || 12);
+  }
 
   if (patch.requestTimeoutMs !== undefined) {
     next.requestTimeoutMs = clampPositiveInteger(patch.requestTimeoutMs, Number(current.requestTimeoutMs) || 45000);
@@ -161,6 +247,7 @@ function createSteps(type) {
   return [
     { id: 'queued', label: '排队中', status: 'pending' },
     { id: 'scan', label: '扫描组件', status: 'pending' },
+    { id: 'research', label: '联网检索', status: 'pending' },
     { id: 'model', label: '调用模型', status: 'pending' },
     { id: 'qa', label: '质量校验', status: 'pending' },
     { id: 'write', label: '写入 slides.md', status: 'pending' },
@@ -199,10 +286,10 @@ function runtimeSnapshot() {
     serverTime: nowIso(),
     status: activeTask ? 'running' : 'idle',
     queueLength: queue.length,
-    hasApiKey: Boolean(sessionApiKey || process.env.GEMINI_API_KEY),
+    hasApiKey: hasAnyApiKey(),
     currentTask: publicTask(activeTask),
     lastTask: publicTask(lastTask),
-    logs: logs.slice(-200),
+    logs: logs.slice(-500),
     preview: previewSnapshot()
   };
 }
@@ -402,7 +489,7 @@ function updateStep(task, stepId, status) {
 function finalizeTaskSuccess(task) {
   for (const step of task.steps) {
     if (step.status === 'pending') {
-      step.status = step.id === 'qa' ? 'skipped' : 'done';
+      step.status = step.id === 'qa' || step.id === 'research' ? 'skipped' : 'done';
     } else if (step.status === 'running') {
       step.status = 'done';
     }
@@ -441,15 +528,38 @@ function handleGenerateOutput(task, line, level) {
   const text = String(line || '').trim();
   if (!text) return;
 
-  addLog(level, text, task.id);
+  let normalizedLevel = level;
+  if (text.includes('次请求失败') || text.includes('质量提示')) {
+    normalizedLevel = 'warn';
+  }
+  addLog(normalizedLevel, text, task.id);
 
   if (text.includes('已发现') && text.includes('可用组件')) {
     updateStep(task, 'scan', 'done');
+    return;
+  }
+
+  if (text.includes('进入联网检索阶段')) {
+    updateStep(task, 'research', 'running');
+    return;
+  }
+
+  if (text.includes('联网检索完成')) {
+    updateStep(task, 'research', 'done');
     updateStep(task, 'model', 'running');
     return;
   }
 
-  if (text.includes('正在调用 Gemini')) {
+  if (text.includes('已禁用联网检索，跳过该阶段')) {
+    updateStep(task, 'research', 'skipped');
+    updateStep(task, 'model', 'running');
+    return;
+  }
+
+  if (text.includes('正在调用 Gemini') || text.includes('正在调用 OpenAI 兼容接口')) {
+    if (task.steps.find(step => step.id === 'research')?.status === 'pending') {
+      updateStep(task, 'research', 'skipped');
+    }
     updateStep(task, 'model', 'running');
     return;
   }
@@ -519,15 +629,55 @@ async function runGenerateTask(task) {
     sessionApiKey = task.payload.apiKey.trim();
   }
 
-  const apiKey = sessionApiKey || process.env.GEMINI_API_KEY;
+  const apiKey = sessionApiKey || process.env.LLM_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error('未检测到 Gemini API Key，请先在页面输入 Key。');
+    throw new Error('未检测到 LLM API Key，请先在页面输入 Key。');
   }
 
   const args = ['generate.js', task.payload.prompt, '--no-export'];
   if (task.payload.skipQa) args.push('--skip-qa');
 
-  const env = { ...process.env, GEMINI_API_KEY: apiKey };
+  const env = {
+    ...process.env,
+    LLM_API_KEY: apiKey,
+    OPENAI_API_KEY: apiKey,
+    GEMINI_API_KEY: apiKey
+  };
+
+  if (task.payload.provider) {
+    env.LLM_PROVIDER = task.payload.provider;
+  }
+  if (task.payload.model) {
+    env.LLM_MODEL = task.payload.model;
+    env.OPENAI_MODEL = task.payload.model;
+    env.GEMINI_MODEL = task.payload.model;
+  }
+  if (task.payload.baseUrl) {
+    env.LLM_BASE_URL = task.payload.baseUrl;
+    env.OPENAI_BASE_URL = task.payload.baseUrl;
+  }
+  if (task.payload.wireApi) {
+    env.LLM_WIRE_API = task.payload.wireApi;
+    env.OPENAI_WIRE_API = task.payload.wireApi;
+  }
+  if (task.payload.reasoningEffort) {
+    env.LLM_REASONING_EFFORT = task.payload.reasoningEffort;
+    env.OPENAI_REASONING_EFFORT = task.payload.reasoningEffort;
+  }
+  if (typeof task.payload.disableResponseStorage === 'boolean') {
+    const storageFlag = task.payload.disableResponseStorage ? 'true' : 'false';
+    env.LLM_DISABLE_RESPONSE_STORAGE = storageFlag;
+    env.OPENAI_DISABLE_RESPONSE_STORAGE = storageFlag;
+  }
+  if (typeof task.payload.enableWebResearch === 'boolean') {
+    env.LLM_ENABLE_WEB_RESEARCH = task.payload.enableWebResearch ? 'true' : 'false';
+  }
+  if (Number.isFinite(task.payload.researchWindowDays) && task.payload.researchWindowDays > 0) {
+    env.LLM_RESEARCH_WINDOW_DAYS = String(task.payload.researchWindowDays);
+  }
+  if (Number.isFinite(task.payload.researchMaxItems) && task.payload.researchMaxItems > 0) {
+    env.LLM_RESEARCH_MAX_ITEMS = String(task.payload.researchMaxItems);
+  }
 
   updateStep(task, 'queued', 'done');
   updateStep(task, 'scan', 'running');
@@ -741,10 +891,49 @@ async function handleApiRequest(req, res, pathname) {
       if (!prompt) {
         throw new Error('prompt 不能为空');
       }
+      const providerInput = body.provider !== undefined ? normalizeLlmProvider(body.provider) : null;
+      if (body.provider !== undefined && !providerInput) {
+        throw new Error('provider 仅支持 gemini | openai');
+      }
+      const wireApiRaw = body.wireApi !== undefined ? body.wireApi : body.openaiWireApi;
+      const wireApiInput = wireApiRaw !== undefined ? normalizeOpenAIWireApi(wireApiRaw) : null;
+      if (wireApiRaw !== undefined && !wireApiInput) {
+        throw new Error('wireApi 仅支持 chat_completions | responses');
+      }
+      const disableStorageRaw = body.disableResponseStorage !== undefined
+        ? body.disableResponseStorage
+        : body.openaiDisableResponseStorage;
+      const disableResponseStorage = disableStorageRaw !== undefined
+        ? parseBoolean(disableStorageRaw)
+        : null;
+      if (disableStorageRaw !== undefined && disableResponseStorage === null) {
+        throw new Error('disableResponseStorage 必须是布尔值');
+      }
+      const enableWebResearch = body.enableWebResearch !== undefined ? parseBoolean(body.enableWebResearch) : null;
+      if (body.enableWebResearch !== undefined && enableWebResearch === null) {
+        throw new Error('enableWebResearch 必须是布尔值');
+      }
+      const researchWindowDays = body.researchWindowDays !== undefined
+        ? clampPositiveInteger(body.researchWindowDays, 7)
+        : null;
+      const researchMaxItems = body.researchMaxItems !== undefined
+        ? clampPositiveInteger(body.researchMaxItems, 12)
+        : null;
       const task = enqueueTask('generate', {
         prompt,
         skipQa: Boolean(body.skipQa),
-        apiKey: typeof body.apiKey === 'string' ? body.apiKey : ''
+        apiKey: typeof body.apiKey === 'string' ? body.apiKey : '',
+        provider: providerInput || undefined,
+        model: typeof body.model === 'string' ? body.model.trim() : '',
+        baseUrl: typeof body.baseUrl === 'string' ? body.baseUrl.trim() : '',
+        wireApi: wireApiInput || undefined,
+        reasoningEffort: typeof (body.reasoningEffort !== undefined ? body.reasoningEffort : body.openaiReasoningEffort) === 'string'
+          ? String(body.reasoningEffort !== undefined ? body.reasoningEffort : body.openaiReasoningEffort).trim()
+          : '',
+        disableResponseStorage: disableResponseStorage,
+        enableWebResearch: enableWebResearch,
+        researchWindowDays: researchWindowDays,
+        researchMaxItems: researchMaxItems
       });
       sendJson(res, 202, {
         ok: true,

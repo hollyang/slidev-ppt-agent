@@ -1,14 +1,22 @@
 {
   "brand": "宇树科技",
   "subtitle": "数据平台迁移宣讲",
-  "footer": "中金财富 · 内部资料",
+  "footer": "宇树科技",
   "colors": {
     "primary": "蓝色",
     "accent": "rose"
   },
   "font": "Inter",
   "exportFormat": "pdf",
-  "model": "gemini-3-flash-preview",
+  "model": "gpt-5.3-codex",
   "requestTimeoutMs": 45000,
-  "maxRetries": 3
+  "maxRetries": 3,
+  "llmBaseUrl": "https://www.heiyucode.com",
+  "llmProvider": "openai",
+  "llmWireApi": "responses",
+  "llmReasoningEffort": "xhigh",
+  "disableResponseStorage": true,
+  "enableWebResearch": true,
+  "researchWindowDays": 7,
+  "researchMaxItems": 12
 }

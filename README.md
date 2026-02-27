@@ -3,6 +3,8 @@
 本项目是一个基于 [Slidev](https://sli.dev/) 的本地化 PPT 生成工具，支持：
 
 - 基于需求自动生成 `slides.md`
+- 支持 Gemini 与 OpenAI 兼容 LLM（可配 baseURL / key / model）
+- 内置联网检索编排（arXiv / HackerNews），可将检索结果注入生成上下文
 - 组件化排版（业务图表、对比、流程等）
 - 一键导出 PDF / PPTX
 - 本地 Web Studio 可视化工作流（含日志、配置、预览）
@@ -16,8 +18,10 @@
 ### 2) Web Studio 模式（推荐）
 - 输入需求并触发生成任务
 - 实时查看任务步骤与日志（SSE）
+- 可视化查看联网检索步骤与检索结果日志
 - 在线编辑 `slides.md`
 - 在线修改 `template.config.json`
+- 可配置 LLM 提供方 / Base URL / Model ID
 - 内置 Slidev 预览（启动/停止/刷新）
 - 触发导出任务（PDF / PPTX）
 
@@ -38,15 +42,31 @@ npm install
 ### 2. 配置 API Key（生成必需）
 
 ```bash
-export GEMINI_API_KEY="你的_API_KEY"
+# 方式 A：通用变量（推荐）
+export LLM_API_KEY="你的_API_KEY"
+
+# 方式 B：Gemini
+export GEMINI_API_KEY="你的_GEMINI_API_KEY"
+
+# 方式 C：OpenAI 兼容接口
+export OPENAI_API_KEY="你的_OPENAI_COMPATIBLE_API_KEY"
+export OPENAI_BASE_URL="https://api.openai.com/v1"
+# 注意：多数兼容服务需要 /v1 路径
+# 若服务走 Responses 协议（例如 wire_api = responses）
+export OPENAI_WIRE_API="responses"
+# 可选：高推理强度
+export OPENAI_REASONING_EFFORT="xhigh"
+# 可选：关闭响应存储
+export OPENAI_DISABLE_RESPONSE_STORAGE="true"
 ```
 
 可选覆盖参数：
 
 ```bash
-export GEMINI_MODEL="gemini-2.0-flash"
-export GEMINI_TIMEOUT_MS="45000"
-export GEMINI_MAX_RETRIES="3"
+export LLM_PROVIDER="gemini"   # 或 openai
+export LLM_MODEL="gemini-2.0-flash"
+export LLM_TIMEOUT_MS="45000"
+export LLM_MAX_RETRIES="3"
 ```
 
 ### 3. 启动 Web Studio
@@ -100,6 +120,14 @@ npm run web:dev
     "accent": "rose"
   },
   "font": "Inter",
+  "llmProvider": "gemini",
+  "llmBaseUrl": "https://api.openai.com/v1",
+  "llmWireApi": "chat_completions",
+  "llmReasoningEffort": "",
+  "disableResponseStorage": false,
+  "enableWebResearch": true,
+  "researchWindowDays": 7,
+  "researchMaxItems": 12,
   "exportFormat": "both",
   "model": "gemini-2.0-flash",
   "requestTimeoutMs": 45000,
@@ -110,9 +138,24 @@ npm run web:dev
 字段说明：
 
 - `exportFormat`: `pdf | pptx | both`
-- `model`: Gemini 模型名
+- `llmProvider`: `gemini | openai`
+- `llmBaseUrl`: OpenAI 兼容接口地址（当 `llmProvider=openai` 时生效）
+- `llmWireApi`: `chat_completions | responses`
+- `llmReasoningEffort`: 推理强度（如 `high`/`xhigh`）
+- `disableResponseStorage`: 是否传 `store=false`
+- `enableWebResearch`: 是否启用联网检索
+- `researchWindowDays`: 联网检索时间窗口（天）
+- `researchMaxItems`: 联网检索条目上限
+- `model`: 模型 ID（Gemini 或 OpenAI 兼容模型）
 - `requestTimeoutMs`: 单次请求超时（毫秒）
 - `maxRetries`: 重试次数
+
+OpenAI 兼容网关若声明 `wire_api = "responses"`（如部分代理网关），建议：
+
+- `llmWireApi = "responses"`
+- `llmBaseUrl` 填网关地址（系统会自动补 `/v1`）
+- `llmReasoningEffort = "xhigh"`（按网关能力调整）
+- `disableResponseStorage = true`（如网关要求）
 
 ## Web Studio 端口
 
@@ -140,6 +183,7 @@ npm run web:dev
 
 ## 注意事项
 
-- 无 `GEMINI_API_KEY` 时，生成任务会失败（编辑/预览/导出仍可用）
+- 无 API Key（`LLM_API_KEY` / `GEMINI_API_KEY` / `OPENAI_API_KEY`）时，生成任务会失败（编辑/预览/导出仍可用）
 - 当前 Web Studio 任务队列为单机单任务串行（MVP 设计）
+- 联网检索默认开启，若在离线环境可将 `enableWebResearch` 设为 `false`
 - 生成内容建议人工复核数据来源与口径

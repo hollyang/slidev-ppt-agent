@@ -7,125 +7,203 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <header class="header">
-      <h1>Slidev Local Web Studio</h1>
-      <p>输入需求 -> 生成 -> 调整 -> 导出</p>
-    </header>
-
-    <main class="layout">
-      <section class="panel">
-        <h2>需求输入</h2>
-        <label for="promptInput">需求描述</label>
-        <textarea id="promptInput" class="input-area" placeholder="例如：输出最近一周 AI 新论文综述，适合技术管理层汇报"></textarea>
-
-        <label for="apiKeyInput">Gemini API Key（仅内存会话，不落盘）</label>
-        <input id="apiKeyInput" type="password" class="text-input" placeholder="可选：本次会话使用" />
-
-        <label class="checkbox">
-          <input id="skipQaInput" type="checkbox" />
-          跳过质量校验（不建议）
-        </label>
-
-        <div class="row">
-          <button id="generateBtn" class="primary">开始生成</button>
-          <button id="refreshBtn">刷新状态</button>
-        </div>
-        <p id="runtimeHint" class="hint">状态：初始化中...</p>
-      </section>
-
-      <section class="panel">
-        <h2>可视化配置</h2>
-        <form id="configForm">
-          <label for="brandInput">品牌</label>
-          <input id="brandInput" type="text" class="text-input" />
-
-          <label for="subtitleInput">副标题</label>
-          <input id="subtitleInput" type="text" class="text-input" />
-
-          <label for="footerInput">页脚</label>
-          <input id="footerInput" type="text" class="text-input" />
-
-          <div class="grid-2">
-            <div>
-              <label for="primaryColorInput">主色</label>
-              <input id="primaryColorInput" type="text" class="text-input" />
-            </div>
-            <div>
-              <label for="accentColorInput">强调色</label>
-              <input id="accentColorInput" type="text" class="text-input" />
-            </div>
-          </div>
-
-          <div class="grid-2">
-            <div>
-              <label for="fontInput">字体</label>
-              <input id="fontInput" type="text" class="text-input" />
-            </div>
-            <div>
-              <label for="modelInput">模型</label>
-              <input id="modelInput" type="text" class="text-input" />
-            </div>
-          </div>
-
-          <div class="grid-3">
-            <div>
-              <label for="timeoutInput">超时(ms)</label>
-              <input id="timeoutInput" type="number" class="text-input" min="1000" />
-            </div>
-            <div>
-              <label for="retryInput">重试次数</label>
-              <input id="retryInput" type="number" class="text-input" min="1" />
-            </div>
-            <div>
-              <label for="formatInput">默认导出</label>
-              <select id="formatInput" class="text-input">
-                <option value="pdf">pdf</option>
-                <option value="pptx">pptx</option>
-                <option value="both">both</option>
-              </select>
-            </div>
-          </div>
-
-          <button type="submit" class="primary">保存配置</button>
-        </form>
-      </section>
-
-      <section class="panel full">
-        <div class="row space-between">
-          <h2>可视化工作过程</h2>
-          <div class="row">
-            <button data-export="pdf">导出 PDF</button>
-            <button data-export="pptx">导出 PPTX</button>
-            <button data-export="both">导出全部</button>
+    <div class="app-shell">
+      <header class="header">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true"></div>
+          <div>
+            <h1>Slidev Local Web Studio</h1>
+            <p>输入需求 -> 生成 -> 调整 -> 预览 -> 导出</p>
           </div>
         </div>
-        <div id="stepView" class="steps"></div>
-        <pre id="logView" class="log-box"></pre>
-      </section>
+        <div class="header-badges">
+          <span id="connectionBadge" class="badge badge-muted">事件连接中</span>
+          <span id="runtimeBadge" class="badge badge-muted">系统空闲</span>
+        </div>
+      </header>
 
-      <section class="panel full">
-        <div class="row space-between">
-          <h2>PPT 预览</h2>
-          <div class="row">
-            <button id="startPreviewBtn" class="primary">启动预览</button>
-            <button id="stopPreviewBtn">停止预览</button>
-            <button id="reloadPreviewBtn">刷新预览</button>
-            <button id="openPreviewBtn">新窗口打开</button>
+      <main class="layout">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>需求输入</h2>
+            <span class="panel-tag">Generate</span>
           </div>
-        </div>
-        <p id="previewHint" class="hint">预览服务状态：未启动</p>
-        <iframe id="previewFrame" class="preview-frame" title="Slidev Preview"></iframe>
-      </section>
+          <label for="promptInput">需求描述</label>
+          <textarea id="promptInput" class="input-area" placeholder="例如：输出最近一周 AI 新论文综述，适合技术管理层汇报"></textarea>
 
-      <section class="panel full">
-        <div class="row space-between">
-          <h2>slides.md 编辑区</h2>
-          <button id="saveSlidesBtn" class="primary">保存 slides.md</button>
-        </div>
-        <textarea id="slidesInput" class="editor"></textarea>
-      </section>
-    </main>
+          <label for="apiKeyInput">LLM API Key（支持 Gemini / OpenAI，仅读内存）</label>
+          <input id="apiKeyInput" type="password" class="text-input" placeholder="可选：本次会话使用" />
+
+          <label class="checkbox">
+            <input id="skipQaInput" type="checkbox" />
+            跳过质量校验（不建议）
+          </label>
+
+          <div class="row actions">
+            <button id="generateBtn" class="primary">开始生成</button>
+            <button id="refreshBtn">刷新状态</button>
+          </div>
+          <p id="runtimeHint" class="hint status-line">状态：初始化中...</p>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>可视化配置</h2>
+            <span class="panel-tag">Config</span>
+          </div>
+          <form id="configForm">
+            <label for="brandInput">品牌</label>
+            <input id="brandInput" type="text" class="text-input" />
+
+            <label for="subtitleInput">副标题</label>
+            <input id="subtitleInput" type="text" class="text-input" />
+
+            <label for="footerInput">页脚</label>
+            <input id="footerInput" type="text" class="text-input" />
+
+            <div class="grid-2">
+              <div>
+                <label for="primaryColorInput">主色</label>
+                <input id="primaryColorInput" type="text" class="text-input" />
+              </div>
+              <div>
+                <label for="accentColorInput">强调色</label>
+                <input id="accentColorInput" type="text" class="text-input" />
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div>
+                <label for="fontInput">字体</label>
+                <input id="fontInput" type="text" class="text-input" />
+              </div>
+              <div>
+                <label for="providerInput">LLM 提供方</label>
+                <select id="providerInput" class="text-input">
+                  <option value="gemini">gemini</option>
+                  <option value="openai">openai-compatible</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div>
+                <label for="modelInput">模型 ID</label>
+                <input id="modelInput" type="text" class="text-input" />
+              </div>
+              <div>
+                <label for="baseUrlInput">Base URL（OpenAI 兼容）</label>
+                <input id="baseUrlInput" type="text" class="text-input" placeholder="例如：https://api.openai.com/v1" />
+              </div>
+            </div>
+
+            <div class="grid-3">
+              <div>
+                <label for="wireApiInput">OpenAI Wire API</label>
+                <select id="wireApiInput" class="text-input">
+                  <option value="chat_completions">chat_completions</option>
+                  <option value="responses">responses</option>
+                </select>
+              </div>
+              <div>
+                <label for="reasoningEffortInput">Reasoning Effort</label>
+                <input id="reasoningEffortInput" type="text" class="text-input" placeholder="如: xhigh" />
+              </div>
+              <div class="checkbox-wrap">
+                <label class="checkbox">
+                  <input id="disableResponseStorageInput" type="checkbox" />
+                  关闭响应存储(store=false)
+                </label>
+              </div>
+            </div>
+
+            <div class="grid-3">
+              <div class="checkbox-wrap">
+                <label class="checkbox">
+                  <input id="enableWebResearchInput" type="checkbox" checked />
+                  启用联网检索
+                </label>
+              </div>
+              <div>
+                <label for="researchWindowDaysInput">检索窗口(天)</label>
+                <input id="researchWindowDaysInput" type="number" class="text-input" min="1" />
+              </div>
+              <div>
+                <label for="researchMaxItemsInput">检索条目上限</label>
+                <input id="researchMaxItemsInput" type="number" class="text-input" min="3" />
+              </div>
+            </div>
+
+            <div class="grid-3">
+              <div>
+                <label for="timeoutInput">超时(ms)</label>
+                <input id="timeoutInput" type="number" class="text-input" min="1000" />
+              </div>
+              <div>
+                <label for="retryInput">重试次数</label>
+                <input id="retryInput" type="number" class="text-input" min="1" />
+              </div>
+              <div>
+                <label for="formatInput">默认导出</label>
+                <select id="formatInput" class="text-input">
+                  <option value="pdf">pdf</option>
+                  <option value="pptx">pptx</option>
+                  <option value="both">both</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="submit" class="primary">保存配置</button>
+          </form>
+        </section>
+
+        <section class="panel full">
+          <div class="row space-between">
+            <div class="panel-head-inline">
+              <h2>可视化工作过程</h2>
+              <span class="panel-tag">Workflow</span>
+            </div>
+            <div class="row actions">
+              <button data-export="pdf">导出 PDF</button>
+              <button data-export="pptx">导出 PPTX</button>
+              <button data-export="both">导出全部</button>
+            </div>
+          </div>
+          <div id="stepView" class="steps"></div>
+          <pre id="logView" class="log-box"></pre>
+        </section>
+
+        <section class="panel full">
+          <div class="row space-between">
+            <div class="panel-head-inline">
+              <h2>PPT 预览</h2>
+              <span class="panel-tag">Preview</span>
+            </div>
+            <div class="row actions">
+              <button id="startPreviewBtn" class="primary">启动预览</button>
+              <button id="stopPreviewBtn">停止预览</button>
+              <button id="reloadPreviewBtn">刷新预览</button>
+              <button id="openPreviewBtn">新窗口打开</button>
+            </div>
+          </div>
+          <p id="previewHint" class="hint status-line">预览服务状态：未启动</p>
+          <iframe id="previewFrame" class="preview-frame" title="Slidev Preview"></iframe>
+        </section>
+
+        <section class="panel full">
+          <div class="row space-between">
+            <div class="panel-head-inline">
+              <h2>slides.md 编辑区</h2>
+              <span class="panel-tag">Editor</span>
+            </div>
+            <button id="saveSlidesBtn" class="primary">保存 slides.md</button>
+          </div>
+          <p id="slidesMeta" class="hint">0 字符 · 0 行</p>
+          <textarea id="slidesInput" class="editor"></textarea>
+        </section>
+      </main>
+    </div>
 
     <script src="./app.js"></script>
   </body>
-  </html>
+</html>

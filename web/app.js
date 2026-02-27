@@ -10,6 +10,8 @@ const elements = {
   skipQaInput: document.getElementById('skipQaInput'),
   generateBtn: document.getElementById('generateBtn'),
   refreshBtn: document.getElementById('refreshBtn'),
+  connectionBadge: document.getElementById('connectionBadge'),
+  runtimeBadge: document.getElementById('runtimeBadge'),
   runtimeHint: document.getElementById('runtimeHint'),
   configForm: document.getElementById('configForm'),
   brandInput: document.getElementById('brandInput'),
@@ -18,7 +20,15 @@ const elements = {
   primaryColorInput: document.getElementById('primaryColorInput'),
   accentColorInput: document.getElementById('accentColorInput'),
   fontInput: document.getElementById('fontInput'),
+  providerInput: document.getElementById('providerInput'),
   modelInput: document.getElementById('modelInput'),
+  baseUrlInput: document.getElementById('baseUrlInput'),
+  wireApiInput: document.getElementById('wireApiInput'),
+  reasoningEffortInput: document.getElementById('reasoningEffortInput'),
+  disableResponseStorageInput: document.getElementById('disableResponseStorageInput'),
+  enableWebResearchInput: document.getElementById('enableWebResearchInput'),
+  researchWindowDaysInput: document.getElementById('researchWindowDaysInput'),
+  researchMaxItemsInput: document.getElementById('researchMaxItemsInput'),
   timeoutInput: document.getElementById('timeoutInput'),
   retryInput: document.getElementById('retryInput'),
   formatInput: document.getElementById('formatInput'),
@@ -30,12 +40,19 @@ const elements = {
   stopPreviewBtn: document.getElementById('stopPreviewBtn'),
   reloadPreviewBtn: document.getElementById('reloadPreviewBtn'),
   openPreviewBtn: document.getElementById('openPreviewBtn'),
+  slidesMeta: document.getElementById('slidesMeta'),
   slidesInput: document.getElementById('slidesInput'),
   saveSlidesBtn: document.getElementById('saveSlidesBtn')
 };
 
 function setHint(text) {
   elements.runtimeHint.textContent = text;
+}
+
+function setBadge(element, text, type) {
+  if (!element) return;
+  element.textContent = text;
+  element.className = `badge ${type}`;
 }
 
 async function requestJson(url, options = {}) {
@@ -59,7 +76,15 @@ function fillConfig(config = {}) {
   elements.primaryColorInput.value = config.colors?.primary || '';
   elements.accentColorInput.value = config.colors?.accent || '';
   elements.fontInput.value = config.font || '';
+  elements.providerInput.value = config.llmProvider === 'openai' ? 'openai' : 'gemini';
   elements.modelInput.value = config.model || '';
+  elements.baseUrlInput.value = config.llmBaseUrl || '';
+  elements.wireApiInput.value = config.llmWireApi === 'responses' ? 'responses' : 'chat_completions';
+  elements.reasoningEffortInput.value = config.llmReasoningEffort || '';
+  elements.disableResponseStorageInput.checked = Boolean(config.disableResponseStorage);
+  elements.enableWebResearchInput.checked = config.enableWebResearch !== false;
+  elements.researchWindowDaysInput.value = String(config.researchWindowDays || 7);
+  elements.researchMaxItemsInput.value = String(config.researchMaxItems || 12);
   elements.timeoutInput.value = String(config.requestTimeoutMs || 45000);
   elements.retryInput.value = String(config.maxRetries || 3);
   elements.formatInput.value = config.exportFormat || 'pdf';
@@ -71,7 +96,15 @@ function collectConfig() {
     subtitle: elements.subtitleInput.value,
     footer: elements.footerInput.value,
     font: elements.fontInput.value,
+    llmProvider: elements.providerInput.value,
     model: elements.modelInput.value,
+    llmBaseUrl: elements.baseUrlInput.value,
+    llmWireApi: elements.wireApiInput.value,
+    llmReasoningEffort: elements.reasoningEffortInput.value,
+    disableResponseStorage: elements.disableResponseStorageInput.checked,
+    enableWebResearch: elements.enableWebResearchInput.checked,
+    researchWindowDays: Number(elements.researchWindowDaysInput.value || 7),
+    researchMaxItems: Number(elements.researchMaxItemsInput.value || 12),
     requestTimeoutMs: Number(elements.timeoutInput.value || 45000),
     maxRetries: Number(elements.retryInput.value || 3),
     exportFormat: elements.formatInput.value,
@@ -84,17 +117,23 @@ function collectConfig() {
 
 function renderRuntime(runtime) {
   state.runtime = runtime;
-  const status = runtime.status === 'running' ? '运行中' : '空闲';
+  const running = runtime.status === 'running';
+  const status = running ? '运行中' : '空闲';
   const queueText = runtime.queueLength > 0 ? `, 队列 ${runtime.queueLength}` : '';
   const taskText = runtime.currentTask ? `, 当前任务 #${runtime.currentTask.id} (${runtime.currentTask.type})` : '';
   const keyText = runtime.hasApiKey ? '已检测到 API Key' : '未检测到 API Key';
   setHint(`状态：${status}${queueText}${taskText}，${keyText}`);
+  setBadge(elements.runtimeBadge, running ? '任务执行中' : '系统空闲', running ? 'badge-running' : 'badge-muted');
+
+  if (!running && runtime.lastTask?.status === 'failed') {
+    setBadge(elements.runtimeBadge, '最近任务失败', 'badge-error');
+  }
 
   const taskForSteps = runtime.currentTask || runtime.lastTask;
   renderSteps(taskForSteps ? taskForSteps.steps : []);
 
   if (Array.isArray(runtime.logs)) {
-    state.logs = runtime.logs.slice(-200);
+    state.logs = runtime.logs.slice(-500);
     renderLogs();
   }
 
@@ -120,7 +159,7 @@ function renderSteps(steps) {
 }
 
 function renderLogs() {
-  const lines = state.logs.slice(-180).map(entry => {
+  const lines = state.logs.slice(-450).map(entry => {
     const stamp = entry.time ? entry.time.slice(11, 19) : '--:--:--';
     return `[${stamp}] ${entry.level || 'info'} ${entry.message || ''}`;
   });
@@ -132,6 +171,12 @@ function appendLog(log) {
   state.logs.push(log);
   if (state.logs.length > 250) state.logs.shift();
   renderLogs();
+}
+
+function updateSlidesMeta() {
+  const text = elements.slidesInput.value || '';
+  const lines = text ? text.split(/\r?\n/).length : 0;
+  elements.slidesMeta.textContent = `${text.length} 字符 · ${lines} 行`;
 }
 
 function renderPreview(preview) {
@@ -174,6 +219,7 @@ async function loadState() {
   const data = await requestJson('/api/state', { method: 'GET' });
   fillConfig(data.config || {});
   elements.slidesInput.value = data.slides || '';
+  updateSlidesMeta();
   renderRuntime(data.runtime || {});
 }
 
@@ -191,6 +237,15 @@ function bindActions() {
         body: JSON.stringify({
           prompt,
           apiKey: elements.apiKeyInput.value.trim(),
+          provider: elements.providerInput.value,
+          model: elements.modelInput.value.trim(),
+          baseUrl: elements.baseUrlInput.value.trim(),
+          wireApi: elements.wireApiInput.value,
+          reasoningEffort: elements.reasoningEffortInput.value.trim(),
+          disableResponseStorage: elements.disableResponseStorageInput.checked,
+          enableWebResearch: elements.enableWebResearchInput.checked,
+          researchWindowDays: Number(elements.researchWindowDaysInput.value || 7),
+          researchMaxItems: Number(elements.researchMaxItemsInput.value || 12),
           skipQa: elements.skipQaInput.checked
         })
       });
@@ -234,6 +289,10 @@ function bindActions() {
     } catch (error) {
       alert(error.message);
     }
+  });
+
+  elements.slidesInput.addEventListener('input', () => {
+    updateSlidesMeta();
   });
 
   document.querySelectorAll('[data-export]').forEach(button => {
@@ -291,10 +350,12 @@ function bindEvents() {
 
   source.onopen = () => {
     state.connected = true;
+    setBadge(elements.connectionBadge, '事件已连接', 'badge-success');
   };
 
   source.onerror = () => {
     state.connected = false;
+    setBadge(elements.connectionBadge, '连接重试中', 'badge-error');
     setHint('事件流已断开，自动重连中...');
   };
 
@@ -329,6 +390,7 @@ function bindEvents() {
 async function bootstrap() {
   bindActions();
   bindEvents();
+  setBadge(elements.connectionBadge, '连接初始化中', 'badge-muted');
   try {
     await loadState();
   } catch (error) {
