@@ -29,6 +29,7 @@ const elements = {
   enableWebResearchInput: document.getElementById('enableWebResearchInput'),
   researchWindowDaysInput: document.getElementById('researchWindowDaysInput'),
   researchMaxItemsInput: document.getElementById('researchMaxItemsInput'),
+  researchProvidersInput: document.getElementById('researchProvidersInput'),
   timeoutInput: document.getElementById('timeoutInput'),
   retryInput: document.getElementById('retryInput'),
   formatInput: document.getElementById('formatInput'),
@@ -85,6 +86,7 @@ function fillConfig(config = {}) {
   elements.enableWebResearchInput.checked = config.enableWebResearch !== false;
   elements.researchWindowDaysInput.value = String(config.researchWindowDays || 7);
   elements.researchMaxItemsInput.value = String(config.researchMaxItems || 12);
+  elements.researchProvidersInput.value = config.researchProviders || 'auto';
   elements.timeoutInput.value = String(config.requestTimeoutMs || 45000);
   elements.retryInput.value = String(config.maxRetries || 3);
   elements.formatInput.value = config.exportFormat || 'pdf';
@@ -105,6 +107,7 @@ function collectConfig() {
     enableWebResearch: elements.enableWebResearchInput.checked,
     researchWindowDays: Number(elements.researchWindowDaysInput.value || 7),
     researchMaxItems: Number(elements.researchMaxItemsInput.value || 12),
+    researchProviders: elements.researchProvidersInput.value.trim() || 'auto',
     requestTimeoutMs: Number(elements.timeoutInput.value || 45000),
     maxRetries: Number(elements.retryInput.value || 3),
     exportFormat: elements.formatInput.value,
@@ -246,6 +249,7 @@ function bindActions() {
           enableWebResearch: elements.enableWebResearchInput.checked,
           researchWindowDays: Number(elements.researchWindowDaysInput.value || 7),
           researchMaxItems: Number(elements.researchMaxItemsInput.value || 12),
+          researchProviders: elements.researchProvidersInput.value.trim() || 'auto',
           skipQa: elements.skipQaInput.checked
         })
       });

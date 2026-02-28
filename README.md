@@ -4,7 +4,7 @@
 
 - 基于需求自动生成 `slides.md`
 - 支持 Gemini 与 OpenAI 兼容 LLM（可配 baseURL / key / model）
-- 内置联网检索编排（arXiv / HackerNews），可将检索结果注入生成上下文
+- 内置联网检索编排（arXiv / HackerNews），含评分排序与引用注入
 - 组件化排版（业务图表、对比、流程等）
 - 一键导出 PDF / PPTX
 - 本地 Web Studio 可视化工作流（含日志、配置、预览）
@@ -18,7 +18,7 @@
 ### 2) Web Studio 模式（推荐）
 - 输入需求并触发生成任务
 - 实时查看任务步骤与日志（SSE）
-- 可视化查看联网检索步骤与检索结果日志
+- 可视化查看联网检索步骤、评分结果与引用日志
 - 在线编辑 `slides.md`
 - 在线修改 `template.config.json`
 - 可配置 LLM 提供方 / Base URL / Model ID
@@ -126,6 +126,7 @@ npm run web:dev
   "llmReasoningEffort": "",
   "disableResponseStorage": false,
   "enableWebResearch": true,
+  "researchProviders": "auto",
   "researchWindowDays": 7,
   "researchMaxItems": 12,
   "exportFormat": "both",
@@ -144,6 +145,7 @@ npm run web:dev
 - `llmReasoningEffort`: 推理强度（如 `high`/`xhigh`）
 - `disableResponseStorage`: 是否传 `store=false`
 - `enableWebResearch`: 是否启用联网检索
+- `researchProviders`: 检索来源路由（`auto` 或 `arxiv,google_news,baidu,github,hn`）
 - `researchWindowDays`: 联网检索时间窗口（天）
 - `researchMaxItems`: 联网检索条目上限
 - `model`: 模型 ID（Gemini 或 OpenAI 兼容模型）
@@ -156,6 +158,8 @@ OpenAI 兼容网关若声明 `wire_api = "responses"`（如部分代理网关）
 - `llmBaseUrl` 填网关地址（系统会自动补 `/v1`）
 - `llmReasoningEffort = "xhigh"`（按网关能力调整）
 - `disableResponseStorage = true`（如网关要求）
+
+联网检索在 `auto` 模式下会按主题路由到头部来源（如 arXiv、Google News、Baidu、GitHub、Hacker News），并进行评分排序与引用编号注入。
 
 ## Web Studio 端口
 

@@ -17,6 +17,7 @@ const PREVIEW_URL = `http://${PREVIEW_HOST}:${PREVIEW_PORT}`;
 const VALID_EXPORT_FORMATS = new Set(['pdf', 'pptx', 'both']);
 const VALID_LLM_PROVIDERS = new Set(['gemini', 'openai']);
 const VALID_OPENAI_WIRE_APIS = new Set(['chat_completions', 'responses']);
+const VALID_RESEARCH_PROVIDERS = new Set(['arxiv', 'google_news', 'baidu', 'github', 'hn', 'auto']);
 const MAX_LOGS = 1000;
 
 let taskIdSeed = 0;
@@ -90,6 +91,28 @@ function normalizeOpenAIWireApi(value) {
   if (raw === 'responses') return 'responses';
   if (VALID_OPENAI_WIRE_APIS.has(raw)) return raw;
   return null;
+}
+
+function normalizeResearchProviders(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return null;
+  const tokens = raw
+    .split(/[,\s|]+/)
+    .map(item => String(item || '').trim().toLowerCase())
+    .filter(Boolean)
+    .map(item => {
+      if (item === 'google' || item === 'googlenews' || item === 'google-news') return 'google_news';
+      if (item === 'baidu_search' || item === 'baidunews') return 'baidu';
+      if (item === 'hackernews' || item === 'hacker-news') return 'hn';
+      return item;
+    });
+  if (!tokens.length) return null;
+  const unique = [];
+  for (const token of tokens) {
+    if (!VALID_RESEARCH_PROVIDERS.has(token)) return null;
+    if (!unique.includes(token)) unique.push(token);
+  }
+  return unique.join(',');
 }
 
 function parseBoolean(value) {
@@ -168,6 +191,14 @@ function mergeConfig(current, patch) {
 
   if (patch.researchMaxItems !== undefined) {
     next.researchMaxItems = clampPositiveInteger(patch.researchMaxItems, Number(current.researchMaxItems) || 12);
+  }
+
+  if (patch.researchProviders !== undefined) {
+    const providers = normalizeResearchProviders(patch.researchProviders);
+    if (!providers) {
+      throw new Error('researchProviders 无效，示例: auto 或 arxiv,google_news,baidu,github,hn');
+    }
+    next.researchProviders = providers;
   }
 
   if (patch.requestTimeoutMs !== undefined) {
@@ -678,6 +709,9 @@ async function runGenerateTask(task) {
   if (Number.isFinite(task.payload.researchMaxItems) && task.payload.researchMaxItems > 0) {
     env.LLM_RESEARCH_MAX_ITEMS = String(task.payload.researchMaxItems);
   }
+  if (typeof task.payload.researchProviders === 'string' && task.payload.researchProviders.trim()) {
+    env.LLM_RESEARCH_PROVIDERS = task.payload.researchProviders.trim();
+  }
 
   updateStep(task, 'queued', 'done');
   updateStep(task, 'scan', 'running');
@@ -919,6 +953,12 @@ async function handleApiRequest(req, res, pathname) {
       const researchMaxItems = body.researchMaxItems !== undefined
         ? clampPositiveInteger(body.researchMaxItems, 12)
         : null;
+      const researchProviders = body.researchProviders !== undefined
+        ? normalizeResearchProviders(body.researchProviders)
+        : null;
+      if (body.researchProviders !== undefined && !researchProviders) {
+        throw new Error('researchProviders 无效，示例: auto 或 arxiv,google_news,baidu,github,hn');
+      }
       const task = enqueueTask('generate', {
         prompt,
         skipQa: Boolean(body.skipQa),
@@ -933,7 +973,8 @@ async function handleApiRequest(req, res, pathname) {
         disableResponseStorage: disableResponseStorage,
         enableWebResearch: enableWebResearch,
         researchWindowDays: researchWindowDays,
-        researchMaxItems: researchMaxItems
+        researchMaxItems: researchMaxItems,
+        researchProviders: researchProviders
       });
       sendJson(res, 202, {
         ok: true,

@@ -1,5 +1,5 @@
 {
-  "brand": "宇树科技",
+  "brand": "",
   "subtitle": "数据平台迁移宣讲",
   "footer": "宇树科技",
   "colors": {
@@ -14,9 +14,10 @@
   "llmBaseUrl": "https://www.heiyucode.com",
   "llmProvider": "openai",
   "llmWireApi": "responses",
-  "llmReasoningEffort": "xhigh",
+  "llmReasoningEffort": "high",
   "disableResponseStorage": true,
   "enableWebResearch": true,
+  "researchProviders": "auto",
   "researchWindowDays": 7,
   "researchMaxItems": 12
 }

@@ -40,12 +40,14 @@ const DEFAULT_DISABLE_RESPONSE_STORAGE = toBoolean(configValue('disableResponseS
 const DEFAULT_ENABLE_WEB_RESEARCH = toBoolean(configValue('enableWebResearch', true), true);
 const DEFAULT_RESEARCH_WINDOW_DAYS = Math.max(1, Number(configValue('researchWindowDays', 7)) || 7);
 const DEFAULT_RESEARCH_MAX_ITEMS = Math.max(3, Number(configValue('researchMaxItems', 12)) || 12);
+const DEFAULT_RESEARCH_PROVIDERS = String(configValue('researchProviders', 'auto')).trim() || 'auto';
 const DEFAULT_TIMEOUT_MS = Number(configValue('requestTimeoutMs', 45000));
 const DEFAULT_RETRIES = Number(configValue('maxRetries', 3));
 const DEFAULT_TIMEOUT_FLOOR_MS = 90000;
 const DEFAULT_MAX_TIMEOUT_MS = Math.max(DEFAULT_TIMEOUT_MS * 3, 180000);
 const DEFAULT_RETRY_BASE_MS = 1000;
 const DEFAULT_RETRY_MAX_WAIT_MS = 10000;
+const VALID_RESEARCH_PROVIDERS = new Set(['arxiv', 'google_news', 'baidu', 'github', 'hn']);
 
 function configValue(key, fallback) {
   return config && config[key] !== undefined ? config[key] : fallback;
@@ -64,6 +66,30 @@ function normalizeOpenAIWireApi(value) {
   if (raw === 'responses') return 'responses';
   if (VALID_OPENAI_WIRE_APIS.has(raw)) return raw;
   return 'chat_completions';
+}
+
+function normalizeResearchProvider(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (raw === 'google' || raw === 'googlenews' || raw === 'google-news') return 'google_news';
+  if (raw === 'baidu_search' || raw === 'baidunews') return 'baidu';
+  if (raw === 'hackernews' || raw === 'hacker-news') return 'hn';
+  if (VALID_RESEARCH_PROVIDERS.has(raw)) return raw;
+  return null;
+}
+
+function parseResearchProviders(value) {
+  const raw = String(value || '').trim();
+  if (!raw || raw.toLowerCase() === 'auto') return null;
+  const providers = raw
+    .split(/[,\s|]+/)
+    .map(item => normalizeResearchProvider(item))
+    .filter(Boolean);
+  const unique = [];
+  for (const provider of providers) {
+    if (provider === 'auto') continue;
+    if (!unique.includes(provider)) unique.push(provider);
+  }
+  return unique.length ? unique : null;
 }
 
 function resolveLlmProvider() {
@@ -214,7 +240,7 @@ function validateSlidesContent(text) {
   }
 
   const numericClaimPattern = /(\d+(?:\.\d+)?\s*(%|x|倍|亿|万|万元|亿元|美元|USD|\$))/i;
-  const sourceHintPattern = /(来源|source|公开数据|财报|统计局|IDC|Gartner|\[估算\]|假设)/i;
+  const sourceHintPattern = /(来源|source|公开数据|财报|统计局|IDC|Gartner|\[估算\]|假设|\[S\d+\])/i;
   const claimWarnings = [];
   trimmed.split('\n').forEach((line, idx) => {
     if (numericClaimPattern.test(line) && !sourceHintPattern.test(line)) {
@@ -320,7 +346,8 @@ transition: fade-out
 4. 结尾页使用 \`theme-dark-ending\` 全屏色块。
 5. **步进动画 (v-clicks)**：极度推荐！如果你写的是文字列表 (ul/li)，请在外面包裹一层 \\\`<v-clicks>\\\` 标签，让文字能“按键盘后逐条出现”以制造悬念。但千万不要把 \\\`<v-click>\\\` 加到 \\\`NodeFlow\\\` 或其它大型图表上，导致首屏漏白。
 6. 涉及关键结论的数字，必须在同一段中标注来源或假设；没有来源时使用 \`[估算]\` 标签，避免误导为真实公开数据。
-7. 禁止输出“正在抓取/正在搜索/执行中”等过程描述。若用户侧已提供联网检索资料，请直接基于该资料输出可交付的完整 Slidev Markdown，并对关键结论标注来源。
+7. 若输入中存在检索资料编号（例如 \`[S1]\`），请在涉及事实或数据的句末引用对应编号（如“... 该方法将推理成本降低 18% [S1][S4]”）。
+8. 禁止输出“正在抓取/正在搜索/执行中”等过程描述。若用户侧已提供联网检索资料，请直接基于该资料输出可交付的完整 Slidev Markdown，并对关键结论标注来源编号。
 
 第一行必须从 \`---\` 开始。不要输出 \`\`\`markdown 围栏。`;
 }
@@ -346,7 +373,8 @@ ${outputPreview}
 layout: custom
 transition: fade-out
 ---
-3) 仅输出最终 Slidev Markdown，不要解释，不要过程日志，不要“正在执行/正在抓取”类文本。`;
+3) 若输入中存在 [Sx] 引用编号，涉及事实/数据的句子请标注对应 [Sx]。
+4) 仅输出最终 Slidev Markdown，不要解释，不要过程日志，不要“正在执行/正在抓取”类文本。`;
 }
 
 function resolveResearchOptions() {
@@ -370,7 +398,12 @@ function resolveResearchOptions() {
     5000,
     Math.floor(isValidNumber(Number(process.env.LLM_RESEARCH_TIMEOUT_MS), 15000))
   );
-  return { enabled, windowDays, maxItems, timeoutMs };
+  const providers = parseResearchProviders(
+    process.env.LLM_RESEARCH_PROVIDERS ??
+    process.env.RESEARCH_PROVIDERS ??
+    DEFAULT_RESEARCH_PROVIDERS
+  );
+  return { enabled, windowDays, maxItems, timeoutMs, providers };
 }
 
 function normalizeWhitespace(text) {
@@ -476,10 +509,6 @@ function extractKeywordHints(promptText) {
   return unique;
 }
 
-function isPaperRequest(promptText) {
-  return /(论文|paper|research|arxiv|学术|期刊|会议)/i.test(String(promptText || ''));
-}
-
 async function fetchArxivResearch(promptText, options) {
   const categoryQuery = '(cat:cs.AI OR cat:cs.LG OR cat:cs.CL OR cat:cs.CV OR cat:stat.ML)';
   const keywordHints = extractKeywordHints(promptText);
@@ -531,6 +560,208 @@ async function fetchHnResearch(promptText, options) {
   return entries;
 }
 
+function extractRssItems(xmlText) {
+  const items = [];
+  const matches = String(xmlText || '').matchAll(/<item>([\s\S]*?)<\/item>/g);
+  const pick = (block, tag) => {
+    const matched = block.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i'));
+    return matched ? normalizeWhitespace(matched[1]) : '';
+  };
+  for (const matched of matches) {
+    const block = matched[1];
+    const title = shortText(pick(block, 'title'), 260);
+    const link = pick(block, 'link');
+    const description = shortText(pick(block, 'description'), 320);
+    const pubDate = pick(block, 'pubDate');
+    if (!title || !link) continue;
+    items.push({
+      title,
+      summary: description,
+      url: link,
+      published: pubDate,
+      authors: [],
+      categories: [],
+      source: 'RSS'
+    });
+  }
+  return items;
+}
+
+async function fetchGoogleNewsResearch(promptText, options) {
+  const hints = extractKeywordHints(promptText);
+  const query = hints.length ? `${hints.join(' ')} ai` : normalizeWhitespace(promptText || 'ai');
+  const timeScoped = `${query} when:${Math.max(1, options.windowDays)}d`;
+  const url = `https://news.google.com/rss/search?q=${encodeURIComponent(timeScoped)}&hl=zh-CN&gl=CN&ceid=CN:zh-Hans`;
+  logResearch(`Google News 检索开始 (query=${timeScoped})`);
+  const xmlText = await fetchTextWithTimeout(url, options.timeoutMs, {
+    Accept: 'application/rss+xml, application/xml'
+  });
+  const entries = extractRssItems(xmlText)
+    .map(item => ({ ...item, source: 'GoogleNews' }))
+    .filter(item => dateWithinDays(item.published, options.windowDays))
+    .slice(0, Math.max(3, Math.min(12, options.maxItems)));
+  logResearch(`Google News 检索完成 (items=${entries.length})`);
+  return entries;
+}
+
+async function fetchGithubResearch(promptText, options) {
+  const hints = extractKeywordHints(promptText);
+  const query = hints.length ? `${hints.join(' ')} ai in:name,description,readme` : 'ai in:name,description,readme';
+  const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=updated&order=desc&per_page=20`;
+  logResearch(`GitHub 检索开始 (query=${query})`);
+  const data = await fetchJsonWithTimeout(url, options.timeoutMs, {
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'slidev-ppt-agent'
+  });
+  const items = Array.isArray(data?.items) ? data.items : [];
+  const entries = items
+    .map(item => ({
+      title: shortText(item.full_name || item.name || '', 200),
+      summary: shortText(item.description || '', 280),
+      url: item.html_url || '',
+      published: item.updated_at || item.created_at || '',
+      authors: [item.owner?.login].filter(Boolean),
+      categories: Array.isArray(item.topics) ? item.topics : [],
+      source: 'GitHub'
+    }))
+    .filter(item => item.title && item.url && dateWithinDays(item.published, Math.max(options.windowDays, 30)))
+    .slice(0, Math.max(3, Math.min(10, options.maxItems)));
+  logResearch(`GitHub 检索完成 (items=${entries.length})`);
+  return entries;
+}
+
+async function fetchBaiduResearch(promptText, options) {
+  const query = normalizeWhitespace(promptText || 'AI');
+  const url = `https://www.baidu.com/s?wd=${encodeURIComponent(query)}&rn=20`;
+  logResearch(`Baidu 检索开始 (query=${query})`);
+  const htmlText = await fetchTextWithTimeout(url, options.timeoutMs, {
+    Accept: 'text/html',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36'
+  });
+
+  const entries = [];
+  const matches = htmlText.matchAll(/<h3[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<\/h3>/gi);
+  for (const matched of matches) {
+    const link = matched[1];
+    const title = shortText(matched[2], 220);
+    if (!link || !title) continue;
+    entries.push({
+      title,
+      summary: '',
+      url: link,
+      published: new Date().toISOString(),
+      authors: [],
+      categories: [],
+      source: 'Baidu'
+    });
+    if (entries.length >= Math.max(3, Math.min(8, options.maxItems))) break;
+  }
+  logResearch(`Baidu 检索完成 (items=${entries.length})`);
+  return entries;
+}
+
+function classifyResearchIntent(promptText) {
+  const text = String(promptText || '').toLowerCase();
+  if (/(论文|paper|research|arxiv|学术|期刊|会议)/i.test(text)) return 'paper';
+  if (/(开源|github|repo|工程|代码|框架|sdk|agent|部署|vibe\s*coding)/i.test(text)) return 'engineering';
+  if (/(资讯|新闻|大事记|行业|市场|公司|融资|发布|热点)/i.test(text)) return 'news';
+  return 'general';
+}
+
+function resolveResearchProviders(promptText, options) {
+  if (Array.isArray(options.providers) && options.providers.length) {
+    return options.providers;
+  }
+
+  const intent = classifyResearchIntent(promptText);
+  if (intent === 'paper') return ['arxiv', 'google_news', 'github'];
+  if (intent === 'engineering') return ['github', 'google_news', 'hn', 'baidu'];
+  if (intent === 'news') return ['google_news', 'baidu', 'hn', 'arxiv'];
+  return ['google_news', 'baidu', 'github', 'arxiv', 'hn'];
+}
+
+function normalizeUrlForDedup(rawUrl) {
+  try {
+    const parsed = new URL(String(rawUrl || ''));
+    parsed.hash = '';
+    const trackingParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'ref', 'source'];
+    trackingParams.forEach(key => parsed.searchParams.delete(key));
+    parsed.searchParams.sort();
+    return `${parsed.origin}${parsed.pathname}${parsed.search ? `?${parsed.searchParams.toString()}` : ''}`;
+  } catch {
+    return String(rawUrl || '').trim();
+  }
+}
+
+function scoreSourceTrust(source) {
+  const map = {
+    arXiv: 1.0,
+    OpenReview: 0.95,
+    PapersWithCode: 0.9,
+    HackerNews: 0.55
+  };
+  return map[source] || 0.6;
+}
+
+function scoreRecency(publishedAt, windowDays) {
+  const published = Date.parse(publishedAt || '');
+  if (!Number.isFinite(published)) return 0.2;
+  const ageMs = Math.max(0, Date.now() - published);
+  const windowMs = Math.max(1, windowDays) * 24 * 60 * 60 * 1000;
+  const normalized = 1 - Math.min(1, ageMs / windowMs);
+  return 0.2 + normalized * 0.8;
+}
+
+function scoreKeywordRelevance(promptText, item) {
+  const hints = extractKeywordHints(promptText);
+  if (!hints.length) return 0.6;
+  const haystack = `${item.title || ''} ${item.summary || ''} ${(item.categories || []).join(' ')}`.toLowerCase();
+  let hitCount = 0;
+  for (const token of hints) {
+    if (haystack.includes(token)) hitCount += 1;
+  }
+  const ratio = hitCount / hints.length;
+  return 0.3 + ratio * 0.7;
+}
+
+function computeResearchScore(promptText, item, options) {
+  const trust = scoreSourceTrust(item.source);
+  const recency = scoreRecency(item.published, options.windowDays);
+  const relevance = scoreKeywordRelevance(promptText, item);
+  const weighted = trust * 0.5 + recency * 0.25 + relevance * 0.25;
+  return Math.round(weighted * 1000) / 10;
+}
+
+function enrichResearchItems(promptText, items, options) {
+  const deduped = [];
+  const seen = new Set();
+  for (const item of items) {
+    const normalizedUrl = normalizeUrlForDedup(item.url);
+    const key = `${item.source}|${normalizedUrl}|${shortText(item.title, 180)}`.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push({
+      ...item,
+      url: normalizedUrl
+    });
+  }
+
+  const scored = deduped.map(item => ({
+    ...item,
+    score: computeResearchScore(promptText, item, options)
+  }));
+
+  scored.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return Date.parse(b.published || 0) - Date.parse(a.published || 0);
+  });
+
+  return scored.slice(0, options.maxItems).map((item, index) => ({
+    ...item,
+    refId: `S${index + 1}`
+  }));
+}
+
 function buildResearchContext(items, options) {
   if (!items.length) return '';
   const lines = [
@@ -542,15 +773,17 @@ function buildResearchContext(items, options) {
   items.forEach((item, index) => {
     const published = String(item.published || '').slice(0, 10) || '未知日期';
     const authors = item.authors && item.authors.length ? item.authors.slice(0, 3).join(', ') : '未知作者';
-    lines.push(`${index + 1}. [${item.source}] ${item.title}`);
+    lines.push(`${index + 1}. [${item.refId}] [${item.source}] ${item.title}`);
     lines.push(`   - date: ${published}`);
+    lines.push(`   - score: ${item.score}`);
     lines.push(`   - authors: ${authors}`);
     lines.push(`   - url: ${item.url}`);
     if (item.summary) {
       lines.push(`   - summary: ${item.summary}`);
     }
   });
-  lines.push('请基于以上资料撰写内容，并在相关页标注来源链接或来源说明。');
+  lines.push('引用规则：涉及事实、数据、结论的句子，句末必须标注来源编号（如 [S1] 或 [S2][S5]）。');
+  lines.push('请基于以上资料撰写内容，并在相关页标注来源编号。');
   return lines.join('\n');
 }
 
@@ -562,37 +795,128 @@ async function runWebResearch(promptText) {
   }
 
   logFlow('进入联网检索阶段');
-  const tasks = [fetchArxivResearch(promptText, options)];
-  if (!isPaperRequest(promptText)) {
-    tasks.push(fetchHnResearch(promptText, options));
-  }
+  const providers = resolveResearchProviders(promptText, options);
+  logResearch(`检索路由: ${providers.join(', ')}`);
 
-  const settled = await Promise.allSettled(tasks);
+  const providerFetchers = {
+    arxiv: fetchArxivResearch,
+    google_news: fetchGoogleNewsResearch,
+    baidu: fetchBaiduResearch,
+    github: fetchGithubResearch,
+    hn: fetchHnResearch
+  };
+  const providerTasks = providers
+    .map(provider => {
+      const fn = providerFetchers[provider];
+      if (!fn) return null;
+      return { provider, promise: fn(promptText, options) };
+    })
+    .filter(Boolean);
+
+  const settled = await Promise.allSettled(providerTasks.map(item => item.promise));
   const items = [];
-  for (const result of settled) {
+  for (let index = 0; index < settled.length; index++) {
+    const result = settled[index];
+    const provider = providerTasks[index]?.provider || 'unknown';
     if (result.status === 'fulfilled') {
       items.push(...result.value);
       continue;
     }
-    logResearch(`检索通道失败: ${summarizeError(result.reason)}`);
+    logResearch(`检索通道失败(${provider}): ${summarizeError(result.reason)}`);
   }
 
-  const deduped = [];
+  const selected = enrichResearchItems(promptText, items, options);
+  const context = buildResearchContext(selected, options);
+  logFlow(`联网检索完成 (items=${selected.length})`);
+  if (!selected.length) {
+    logResearch('未命中可用在线资料，将仅基于需求生成。');
+  } else {
+    selected.slice(0, Math.min(8, selected.length)).forEach((item, index) => {
+      logResearch(
+        `候选#${index + 1} ${item.refId} score=${item.score} [${item.source}] ${String(item.published || '').slice(0, 10)} ${item.title}`
+      );
+    });
+  }
+  return { enabled: true, items: selected, context };
+}
+
+function extractUsedReferenceIds(slidesContent) {
+  const matched = String(slidesContent || '').match(/\[S\d+\]/g) || [];
+  const ordered = [];
   const seen = new Set();
-  for (const item of items) {
-    const key = `${item.source}|${item.url}|${item.title}`.toLowerCase();
+  for (const token of matched) {
+    if (seen.has(token)) continue;
+    seen.add(token);
+    ordered.push(token.replace(/\[|\]/g, ''));
+  }
+  return ordered;
+}
+
+function chunkArray(items, chunkSize) {
+  const chunks = [];
+  for (let i = 0; i < items.length; i += chunkSize) {
+    chunks.push(items.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
+
+function renderReferenceSlideChunk(items, index, totalChunks) {
+  const title = totalChunks > 1 ? `参考资料 (${index + 1}/${totalChunks})` : '参考资料';
+  const lines = [
+    '---',
+    'layout: custom',
+    'transition: fade-out',
+    '---',
+    '',
+    `<div class="px-6 py-8 h-full overflow-auto">`,
+    `<div class="theme-badge mb-3">${title}</div>`,
+    `<h2 class="text-2xl font-bold mb-4 theme-text">Sources & Citations</h2>`,
+    '',
+    ...items.map(item => {
+      const date = String(item.published || '').slice(0, 10) || '未知日期';
+      return `- **[${item.refId}]** ${item.title}  \\n  ${item.source} · ${date}  \\n  ${item.url}`;
+    }),
+    '',
+    '</div>'
+  ];
+  return lines.join('\n');
+}
+
+function injectReferenceSlides(slidesContent, researchItems) {
+  if (!Array.isArray(researchItems) || researchItems.length === 0) {
+    return { content: slidesContent, injected: false, usedCount: 0, refsCount: 0 };
+  }
+  const usedIds = extractUsedReferenceIds(slidesContent);
+  const usedSet = new Set(usedIds);
+  const orderedRefs = researchItems.filter(item => usedSet.has(item.refId));
+  const fallbackRefs = researchItems.filter(item => !usedSet.has(item.refId));
+  const finalRefs = orderedRefs.length ? orderedRefs : researchItems.slice(0, Math.min(8, researchItems.length));
+  if (orderedRefs.length < 4) {
+    const required = 4 - orderedRefs.length;
+    finalRefs.push(...fallbackRefs.slice(0, required));
+  }
+
+  const unique = [];
+  const seen = new Set();
+  for (const item of finalRefs) {
+    const key = item.refId;
     if (seen.has(key)) continue;
     seen.add(key);
-    deduped.push(item);
+    unique.push(item);
   }
-  deduped.sort((a, b) => Date.parse(b.published || 0) - Date.parse(a.published || 0));
-  const trimmed = deduped.slice(0, options.maxItems);
-  const context = buildResearchContext(trimmed, options);
-  logFlow(`联网检索完成 (items=${trimmed.length})`);
-  if (!trimmed.length) {
-    logResearch('未命中可用在线资料，将仅基于需求生成。');
+
+  const chunks = chunkArray(unique, 5);
+  if (!chunks.length) {
+    return { content: slidesContent, injected: false, usedCount: usedIds.length, refsCount: 0 };
   }
-  return { enabled: true, items: trimmed, context };
+  const renderedSlides = chunks.map((chunk, idx) => renderReferenceSlideChunk(chunk, idx, chunks.length)).join('\n\n');
+  const appended = `${String(slidesContent || '').trim()}\n\n${renderedSlides}`;
+  return {
+    content: appended,
+    injected: true,
+    usedCount: usedIds.length,
+    refsCount: unique.length
+  };
 }
 
 function resolveApiKey(provider) {
@@ -872,9 +1196,17 @@ function decodeResponsesEventStream(rawBody) {
   const events = parseSseJsonEvents(rawBody);
   let finalText = '';
   let completedResponse = null;
+  let streamError = null;
 
   for (const event of events) {
     if (!event || typeof event !== 'object') continue;
+    if (event.type === 'error' && event.error && typeof event.error === 'object') {
+      streamError = event.error;
+      continue;
+    }
+    if (!streamError && event.error && typeof event.error === 'object') {
+      streamError = event.error;
+    }
     if (event.type === 'response.output_text.delta' && typeof event.delta === 'string') {
       finalText += event.delta;
       continue;
@@ -893,7 +1225,7 @@ function decodeResponsesEventStream(rawBody) {
     data.output_text = finalText;
   }
 
-  return { events, data };
+  return { events, data, streamError };
 }
 
 async function readOpenAIResponseBody(response, contentType, onSseEvent) {
@@ -919,7 +1251,7 @@ async function readOpenAIResponseBody(response, contentType, onSseEvent) {
       const event = JSON.parse(payloadText);
       sseEventCount += 1;
       if (onSseEvent) onSseEvent(event);
-      if (event?.type === 'response.completed') {
+      if (event?.type === 'response.completed' || event?.type === 'error') {
         completionSeen = true;
       }
     } catch {
@@ -1206,6 +1538,14 @@ async function callOpenAICompatible(systemPrompt, userPrompt) {
           if (type === 'response.completed') {
             logLlm(`SSE completed(status=${event?.response?.status || 'unknown'})`);
             flushStreamLog(true);
+            return;
+          }
+          if (type === 'error' && event?.error && typeof event.error === 'object') {
+            const code = event.error.code || 'unknown';
+            const message = event.error.message || 'unknown';
+            const errType = event.error.type || 'unknown';
+            logLlm(`SSE error(code=${code}, type=${errType}, message=${message})`);
+            flushStreamLog(true);
           }
         }));
       } finally {
@@ -1229,6 +1569,14 @@ async function callOpenAICompatible(systemPrompt, userPrompt) {
         const decoded = decodeResponsesEventStream(rawBody);
         data = decoded.data;
         logLlm(`已解析 Responses SSE 事件 (events=${decoded.events.length})`);
+        if (decoded.streamError) {
+          const errCode = decoded.streamError.code || 'unknown';
+          const errType = decoded.streamError.type || 'unknown';
+          const errMessage = decoded.streamError.message || 'unknown';
+          const err = new Error(`OpenAI SSE 流返回错误事件: ${errCode}/${errType} ${errMessage}`);
+          err.status = errType === 'upstream_error' ? 502 : 500;
+          throw err;
+        }
         if (sseEventCount) {
           const detail = [...sseEventTypes.entries()]
             .map(([type, count]) => `${type}=${count}`)
@@ -1396,6 +1744,7 @@ PPT Agent 生成脚本
   LLM_REASONING_EFFORT 通用推理强度（同 OPENAI_REASONING_EFFORT）
   LLM_DISABLE_RESPONSE_STORAGE 通用关闭响应存储（同 OPENAI_DISABLE_RESPONSE_STORAGE）
   LLM_ENABLE_WEB_RESEARCH 是否启用联网检索 (可选，默认: ${DEFAULT_ENABLE_WEB_RESEARCH})
+  LLM_RESEARCH_PROVIDERS 联网检索来源 (可选，auto 或 arxiv,google_news,baidu,github,hn；默认: ${DEFAULT_RESEARCH_PROVIDERS})
   LLM_RESEARCH_WINDOW_DAYS 联网检索时间窗口天数 (可选，默认: ${DEFAULT_RESEARCH_WINDOW_DAYS})
   LLM_RESEARCH_MAX_ITEMS 联网检索最大条目数 (可选，默认: ${DEFAULT_RESEARCH_MAX_ITEMS})
   LLM_RESEARCH_TIMEOUT_MS 联网检索请求超时毫秒 (可选，默认: 15000)
@@ -1450,6 +1799,17 @@ PPT Agent 生成脚本
   let slidesContent = await callLLM(systemPrompt, effectivePrompt);
   logFlow(`LLM 生成完成 (chars=${slidesContent.length})`);
 
+  // 自动注入引用页（基于检索结果与正文引用标记）
+  if (researchResult.items && researchResult.items.length) {
+    const injection = injectReferenceSlides(slidesContent, researchResult.items);
+    slidesContent = injection.content;
+    if (injection.injected) {
+      logFlow(`引用页注入完成 (refs=${injection.refsCount}, usedMarkers=${injection.usedCount})`);
+    } else {
+      logFlow('未注入引用页（未检测到可用引用条目）');
+    }
+  }
+
   // 质量校验
   logFlow('进入质量校验阶段');
   if (!skipQa) {
@@ -1463,6 +1823,10 @@ PPT Agent 生成脚本
       logFlow('触发格式修复重试 (2/2)');
       const repairPrompt = buildRepairPrompt(effectivePrompt, slidesContent, qaResult.errors);
       slidesContent = await callLLM(systemPrompt, repairPrompt);
+      if (researchResult.items && researchResult.items.length) {
+        const retryInjection = injectReferenceSlides(slidesContent, researchResult.items);
+        slidesContent = retryInjection.content;
+      }
       logFlow(`格式修复重试完成 (chars=${slidesContent.length})`);
       qaResult = validateSlidesContent(slidesContent);
       logFlow(`重试后质量校验结果: errors=${qaResult.errors.length}, warnings=${qaResult.warnings.length}`);
